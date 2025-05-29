@@ -96,18 +96,21 @@ class Database:
         except Exception as e:
             raise Exception(f"Insert failed: {str(e)}")
 
+        # return the symptom without the patient_id and id fields
+        if not response.data or len(response.data) == 0:
+            raise Exception("Insert did not return any data")
+
         return response.data[0]  # usually returns a list
 
     def get_symptoms_for_patient(self, patient_id: UUID) -> list[dict]:
         try:
             response = self.supabase.table("symptoms") \
-                .select("*") \
+                .select("timestamp, title, summary") \
                 .eq("patient_id", str(patient_id)) \
                 .order("timestamp", desc=False) \
                 .execute()
         except Exception as e:
             raise Exception(f"Fetch failed: {str(e)}")
-
         return response.data  # List of rows
 
 # Example usage:
