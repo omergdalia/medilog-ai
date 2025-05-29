@@ -1,29 +1,25 @@
 
-import React, { useState } from 'react';
-import { type SymptomEntry } from '../types';
-import { generateDoctorReport } from '../services/geminiService';
+import React, { useMemo, useState } from 'react';
+import { generateDoctorReport, hasSymptomHistory } from '../services/apiService';
 import { FileTextIcon, AlertCircleIcon, ZapIcon } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 
-interface ReportGeneratorProps {
-  symptomEntries: SymptomEntry[];
-}
 
-export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ symptomEntries }) => {
+export const ReportGenerator: React.FC = () => {
   const [reasonForVisit, setReasonForVisit] = useState<string>('');
   const [generatedReport, setGeneratedReport] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const allowReporting = useMemo(() => hasSymptomHistory('00000000-0000-0000-0000-000000000000'), ['start']);
 
   const handleGenerateReport = async () => {
     if (!reasonForVisit.trim()) {
       setError("Please provide the reason for your doctor visit.");
       return;
     }
-    if (symptomEntries.length === 0) {
+    if (!allowReporting) {
       setError("No symptom entries available to generate a report. Please log some symptoms first.");
-      // Optionally, could still generate a very basic report with just the reason.
-      // For now, require entries.
       return;
     }
 
@@ -32,9 +28,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ symptomEntries
     setGeneratedReport(null);
 
     try {
-      // For simplicity, send all entries. The AI prompt will guide relevance.
-      // In a more complex app, filtering or selection could happen here.
-      const report = await generateDoctorReport("00000000-0000-0000-0000-000000000000", reasonForVisit, symptomEntries);
+      const report = await generateDoctorReport("00000000-0000-0000-0000-000000000000", reasonForVisit);
       setGeneratedReport(report);
     } catch (err) {
       console.error(err);
@@ -68,17 +62,17 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ symptomEntries
           placeholder="e.g., Annual check-up, follow-up on persistent cough, new concerns about joint pain."
           rows={3}
           className="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white text-slate-900"
-          disabled={isLoading}
+          disabled={isLoading || !allowReporting}
         />
         <button
           onClick={handleGenerateReport}
-          disabled={isLoading || !reasonForVisit.trim() || symptomEntries.length === 0}
+          disabled={isLoading || !reasonForVisit.trim() || !allowReporting}
           className="w-full flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
         >
           {isLoading ? <LoadingSpinner size="sm" /> : <ZapIcon className="w-5 h-5 mr-2"/>}
           Generate Report
         </button>
-        {symptomEntries.length === 0 && (
+        {!allowReporting && (
             <p className="text-sm text-amber-700 bg-amber-50 p-2 rounded-md text-center">
                 <AlertCircleIcon className="w-4 h-4 inline mr-1" /> 
                 No symptom entries found. Please log symptoms first to generate a comprehensive report.

@@ -1,14 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { type SymptomEntry, type ChatMessage } from '../types';
-import { sendMessageInChat } from '../services/geminiService';
+import { sendMessageInChat } from '../services/apiService';
 // Fix: Import Edit3Icon
 import { SendIcon, RotateCwIcon, SaveIcon, AlertCircleIcon, MessageSquareIcon, UserIcon, ZapIcon, Edit3Icon, InfoIcon } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 
-interface SymptomLoggerProps {
-  addSymptomEntry: (entry: SymptomEntry) => void;
-}
+import { saveSymptom } from '../services/apiService'; // Placeholder import, replace with actual service
 
 enum LoggingStage {
   InitialInput,
@@ -25,7 +23,7 @@ enum LoggingStage {
 
 const MY_UUID: string = "00000000-0000-0000-0000-000000000000";
 
-export const SymptomLogger: React.FC<SymptomLoggerProps> = ({ addSymptomEntry }) => {
+export const SymptomLogger: React.FC = () => {
   const [initialSymptom, setInitialSymptom] = useState<string>('');
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [currentUserMessage, setCurrentUserMessage] = useState<string>('');
@@ -95,14 +93,7 @@ export const SymptomLogger: React.FC<SymptomLoggerProps> = ({ addSymptomEntry })
   };
 
   const handleSaveEntry = () => {
-    const newEntry: SymptomEntry = {
-      id: `sym_${new Date().getTime()}`,
-      timestamp: new Date(),
-      initialSymptom: initialSymptom,
-      conversation: conversation,
-      // finalSummary: Could ask AI to summarize conversation here if desired
-    };
-    addSymptomEntry(newEntry);
+    saveSymptom('00000000-0000-0000-0000-000000000000');
     setStage(LoggingStage.Done);
     // Optionally reset for new entry after a delay or user action
     setTimeout(() => resetLogger(), 3000);

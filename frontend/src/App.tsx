@@ -16,21 +16,16 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.Logger);
   const [symptomEntries, setSymptomEntries] = useLocalStorage<SymptomEntry[]>('symptomEntries', []);
 
-
-  const addSymptomEntry = (entry: SymptomEntry) => {
-    setSymptomEntries(prevEntries => [...prevEntries, entry]);
-  };
-
   const renderView = () => {
     switch (currentView) {
       case AppView.Logger:
-        return <SymptomLogger addSymptomEntry={addSymptomEntry} />;
+        return <SymptomLogger />;
       case AppView.Reporter:
-        return <ReportGenerator symptomEntries={symptomEntries} />;
+        return <ReportGenerator />;
       case AppView.History:
         return <SymptomHistoryView symptomEntries={symptomEntries} />;
       default:
-        return <SymptomLogger addSymptomEntry={addSymptomEntry} />;
+        return <SymptomLogger />;
     }
   };
   

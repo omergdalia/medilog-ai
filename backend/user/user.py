@@ -1,7 +1,7 @@
 from llm.llm_manager import LLMManager
 from db.db import Database
 from uuid import UUID
-from datetime import datetime, UTC
+from datetime import datetime as dt, UTC
 END_REPORT_TOKEN = "<END_REPORT>"
 
 # format 
@@ -35,18 +35,17 @@ class User:
             # ask Or that his function would return None 
             #if there were no new prompts since the last conversation
             return 
-        summary["timestamp"] = datetime.now(UTC).isoformat()
+        summary["timestamp"] = dt.now(UTC).isoformat()
         # update llm user context to include new summary
-        self.llm.extend_user_context(summary)
+        self.llm.extend_user_context([summary])
 
         # add the user_id to the summary
         summary["patient_id"] = self.user_id
         # add the summary to the database
-        self.database.add_symptom(timestamp=summary["timestamp"], 
-                                  user_id=self.user_id, 
+        self.database.add_symptom(timestamp=dt.fromisoformat(summary["timestamp"]), 
+                                  patient_id=self.user_id, 
                                   symptom_summary=summary["summary"], 
                                   title=summary["title"] )
-        self.llm.extend_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
 
     def get_doctor_report(self, reason_for_visit): 
         """

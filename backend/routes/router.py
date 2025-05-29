@@ -43,6 +43,7 @@ def get_response(user_id: UUID, prompt: str):
 @api_router.post("/save_summary/{user_id}")
 def save_summary(user_id: UUID):
     get_user(user_id=user_id).save_summary_and_update()
+    return JSONResponse(content={'status': 'saved'})
 
 @api_router.get("/doctor_report/{user_id}")
 def get_doctors_report(user_id: UUID, prompt: str):
