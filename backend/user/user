@@ -1,0 +1,48 @@
+from llm_manager import LLMManager
+from db import db
+
+END_REPORT_TOKEN = "<END_REPORT>"
+
+
+class User:
+    def __init__(self, db: db, user_id: int = None):
+        # initialize context load from database
+        user_context = db.get_context(int)
+        self.llm_manager = llm_manager(user_context=user_context, END_REPORT_TOKEN)
+        self.user_id = user_id
+        # initialize context load from database
+
+    def get_response(self, prompt: str):
+        response = self.llm_manager.get_response(prompt)
+        if END_REPORT_TOKEN in response[-10:]:
+            response = response.split(END_REPORT_TOKEN)[0]
+            self.update_user_context()
+        return response
+    
+    def get_summary(self):
+        return self.llm_manager.get_summary()
+    
+    def update_user_context(self) -> None:
+        '''
+        This function updates the database, asks it for a new 
+        report, and updates the llm with the updated user context. 
+        '''
+        summary = self.get_summary()
+        if summary == None: 
+            # ask Or that his function would return None 
+            #if there were no new prompts since the last conversation
+            return 
+        db.add_symptom(user_id=self.user_id, context=summary)
+        self.llm_manager.update_user_context(db.get_symptoms_for_patient(patient_id=user_id))
+
+    def get_doctor_report(self): 
+        """
+        Makes sure that the user context in the LLM chat is updated
+        and creates a doctors report from it.
+        """
+        self.update_user_context()
+        return self.llm_manager.get_doctor_report()
+    
+
+    def get_user_id(self):
+        return self.user_id
