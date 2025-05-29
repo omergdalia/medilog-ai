@@ -18,13 +18,13 @@ class User:
         response = self.llm.get_response(prompt)
         if END_REPORT_TOKEN in response[-10:]:
             response = response.split(END_REPORT_TOKEN)[0]
-            self.update_user_context()
+            self.save_summary_and_update()
         return response
     
     def get_summary(self):
         return self.llm.get_summary()
     
-    def update_user_context(self) -> None:
+    def save_summary_and_update(self) -> None:
         '''
         This function updates the database, asks it for a new 
         report, and updates the llm with the updated user context. 
@@ -46,13 +46,15 @@ class User:
                                   user_id=self.user_id, 
                                   symptom_summary=summary["summary"], 
                                   title=summary["title"] )
-        self.llm.update_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
+        self.llm.extend_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
 
     def get_doctor_report(self, reason_for_visit): 
         """
         Makes sure that the user context in the LLM chat is updated
         and creates a doctors report from it.
         """
-        self.update_user_context()
+        # update the user context in the LLM
+        self.save_summary_and_update()
+        # get the doctor report from the LLM
         return self.llm.get_doctor_report(reason_for_visit)
     

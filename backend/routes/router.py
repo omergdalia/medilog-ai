@@ -31,12 +31,33 @@ def get_response(user_id: UUID, prompt: str):
     answer = get_user(user_id=user_id).get_response(prompt)
     return JSONResponse(content={'answer': answer})
 
+@api_router.post("/save_summary/{user_id}")
+def save_summary(user_id: UUID):
+    get_user(user_id=user_id).save_summary_and_update()
+
 @api_router.get("/doctor_report/{user_id}")
 def get_doctors_report(user_id: UUID, prompt: str):
     print("Received prompt:", prompt)
+
     answer = get_user(user_id=user_id).get_doctor_report(prompt)
     return JSONResponse(content={'answer': answer})
 
+@api_router.get("/has_history/{user_id}")
+def has_history(user_id: UUID) -> bool:
+    """
+    Checks if the user has any recorded symptoms in the database.
+    Returns True if there are symptoms, False otherwise.
+    """
+    history = database.get_symptoms_for_patient(patient_id=user_id)
+    return not len(history) == 0
+    
+@api_router.get("/get_history/{user_id}")
+def get_history(user_id: UUID) -> bool:
+    """
+    Checks if the user has any recorded symptoms in the database.
+    Returns True if there are symptoms, False otherwise.
+    """
+    return database.get_symptoms_for_patient(patient_id=user_id)
 
 # example endpoint -simple GET
 @api_router.get("/status")
