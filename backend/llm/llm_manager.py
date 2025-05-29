@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 # Ensure the API key is set in the environment
-api_key = os.getenv('GENAI_API_KEY')
+api_key = os.getenv('API_KEY')
 
 class LLMManager:
     _NO_CONTEXT_STRING = "No past medical summary provided."
@@ -55,7 +55,7 @@ class LLMManager:
         else:
             raise ValueError("Not supported user context type. Please provide a string or None.")
 
-    def __format_history_to_string(self, history: List[genai.types.Content]) -> str:
+    def __format_history_to_string(self, history: List[Any]) -> str:
         if not history:
             return "No conversation history."
         return "\n".join(
