@@ -1,0 +1,6 @@
+{
+  "name": "MediLogAI: Symptom Tracker & Doctor Report Generator",
+  "description": "An intelligent medical symptom tracker that uses AI to ask relevant follow-up questions and generates organized reports for doctor visits. Symptom data is stored locally for privacy.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
