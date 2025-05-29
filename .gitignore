@@ -1,6 +1,13 @@
 backend/venv/*
 **.pyc
 */__pycache__/*
+<<<<<<< Updated upstream
 
 frontend/node_modules/*
 .idea/*
+=======
+.vscode/settings.json
+.gitignore
+backend/llm/llm_manager.py
+.gitignore
+>>>>>>> Stashed changes

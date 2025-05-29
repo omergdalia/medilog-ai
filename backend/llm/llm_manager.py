@@ -2,6 +2,7 @@ import google.generativeai as genai
 import os
 from typing import Optional, List, Any
 from dotenv import load_dotenv
+import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,14 +16,21 @@ class LLMManager:
         "by asking concise, clarifying questions. Ask only one question at a time. Do not provide diagnoses or treatment advice. "
         "After gathering sufficient details for a symptom (typically 2-4 questions), inquire if the user has other symptoms. "
         "If they report no other symptoms, respond ONLY with the exact text: '{end_text}'.\n"
-        "Consider the following historical context if available:\n{user_context_string}"
+        "Consider the following historical context: dates, symptom titles, and summaries of past medical interactions:\n"
+         "{user_context_string}\n"
     )
     _SUMMARY_SYSTEM_PROMPT = (
         "Generate a concise, factual, bullet-point summary of the *current* medical interaction provided below. "
         "Focus solely on reported symptoms, their characteristics (onset, duration, severity, nature), and any "
         "pertinent information shared by the user during this specific conversation. Exclude conversational filler and any prior history not part of this interaction."
     )
-    _DOCTOR_REPORT_SYSTEM_PROMPT_BASE = ( 
+
+    _SUMMARY_TITLE_SYSTEM_PROMPT = (
+        "Generate a concise title describing the main symptom the user complained of in the current medical interaction summary. "
+        "Examples of titles: 'Headache', 'Chest Pain', 'Fever and Cough', 'Abdominal Pain', 'Back Pain', 'Joint Swelling'.\n"
+    )
+
+    _DOCTOR_REPORT_SYSTEM_PROMPT_BASE = (
         "You are tasked with creating a clinical note for a doctor. Base this note on the provided 'Reason for Visit' and the 'Relevant Past Medical Summary'. "
         "Structure the note to be informative for a physician. If the past summary is extensive, focus on aspects most relevant to the stated reason for visit. "
         "The note should include:\n"
@@ -31,7 +39,7 @@ class LLMManager:
         "Synthesize this into a coherent note. If the past summary is 'No past medical summary provided.', state that clearly."
     )
 
-    def __init__(self, api_key: str = api_key, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
+    def __init__(self, api_key: str, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
         genai.configure(api_key=api_key)
         self._model_name: str = model_name
         self.formatted_user_context_str: str = self.__format_user_context(user_context)
@@ -46,14 +54,36 @@ class LLMManager:
         )
         self.chat_session: Optional[genai.ChatSession] = self.symptom_model.start_chat(history=[])
 
-    def __format_user_context(self, context_data: Any) -> str:
-        "TODO: implement more complex formatting if needed, e.g., for dicts or lists."
+    def __format_user_context(self, context_data: List[dict[str, Any]]) -> str:
+        """
+        Receives a list of dicts with keys 'title', 'summary', and 'timestamp',
+        and returns a nicely formatted string for historical context in prompts.
+        """
         if not context_data:
             return self._NO_CONTEXT_STRING
         if isinstance(context_data, str):
             return context_data
+        elif isinstance(context_data, list):
+            formatted_entries = []
+            for item in context_data:
+                title = item.get('title', 'No Title')
+                summary = item.get('summary', 'No Summary')
+                timestamp = item.get('timestamp', None)
+                if isinstance(timestamp, (int, float)):
+                    # If timestamp is a Unix timestamp
+                    try:
+                        dt = datetime.datetime.fromtimestamp(timestamp)
+                        timestamp_str = dt.strftime('%Y-%m-%d %H:%M')
+                    except Exception:
+                        timestamp_str = str(timestamp)
+                elif isinstance(timestamp, str):
+                    timestamp_str = timestamp
+                else:
+                    timestamp_str = 'Unknown Time'
+                formatted_entries.append(f"[{timestamp_str}] {title}: {summary}")
+            return "\n".join(formatted_entries)
         else:
-            raise ValueError("Not supported user context type. Please provide a string or None.")
+            raise ValueError("Not supported user context type.")
 
     def __format_history_to_string(self, history: List[Any]) -> str:
         if not history:
@@ -81,12 +111,12 @@ class LLMManager:
         except Exception as e:
             raise
 
-    def get_summary(self) -> str:
+    def get_summary(self) -> dict[str, str]:
         """
         Summarize the current chat session as a concise medical interaction summary.
 
         Returns:
-            str: A bullet-point summary of the current medical interaction.
+            dict: A dictionary with keys 'title' and 'summary' for the current medical interaction.
         """
         if not self.chat_session or not self.chat_session.history:
             raise ValueError("No current interaction history available to summarize.")
@@ -96,12 +126,30 @@ class LLMManager:
             system_instruction=self._SUMMARY_SYSTEM_PROMPT
         )
         conversation_text = self.__format_history_to_string(self.chat_session.history)
-        prompt_for_summary = f"Current medical interaction details:\n{conversation_text}" # Pass only current chat
+        prompt_for_summary = f"Current medical interaction details:\n{conversation_text}"
+        answer_dict =  {"title": "", "summary": ""}
         try:
             response = summary_model.generate_content(prompt_for_summary)
-            return response.text
+            answer_dict['summary'] = response.text.strip()
         except Exception as e:
             raise e
+        title_model = genai.GenerativeModel(
+            model_name=self._model_name,
+            system_instruction=self._SUMMARY_TITLE_SYSTEM_PROMPT
+        )
+        try:
+            response = title_model.generate_content(answer_dict['summary'])
+            answer_dict['title'] = response.text.strip()
+        except Exception as e:
+            raise e
+        if not answer_dict['summary']:
+            raise ValueError("Summary generation failed. No summary text returned.")
+        if not answer_dict['title']:
+            raise ValueError("Title generation failed. No title text returned.")
+        return answer_dict
+                
+
+
 
     def get_doctor_report(self, visit_reason: str) -> str:
         """
