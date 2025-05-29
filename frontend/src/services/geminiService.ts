@@ -9,7 +9,6 @@ export const sendMessageInChat = async (id: string, message: string): Promise<st
         'Accept': 'application/json',
       },
     });
-    console.log("Response from Gemini chat:", res.data);
   return res.data.answer; 
   };
 
