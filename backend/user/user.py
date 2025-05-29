@@ -37,7 +37,7 @@ class User:
             return 
         summary["timestamp"] = datetime.now(UTC).isoformat()
         # update llm user context to include new summary
-        self.llm.add_to_user_context(summary)
+        self.llm.extend_user_context(summary)
 
         # add the user_id to the summary
         summary["patient_id"] = self.user_id
