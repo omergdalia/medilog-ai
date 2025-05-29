@@ -1,26 +1,27 @@
-from llm_manager import LLMManager
-from db import db
+from llm.llm_manager import LLMManager
+from db.db import Database
 
 END_REPORT_TOKEN = "<END_REPORT>"
 
 
 class User:
-    def __init__(self, db: db, user_id: int = None):
+    def __init__(self, database: Database, user_id: int = None):
         # initialize context load from database
-        user_context = db.get_context(int)
-        self.llm_manager = llm_manager(user_context=user_context, END_REPORT_TOKEN)
+        self.database = database
+        user_context = database.get_context(int)
+        self.llm = LLMManager(user_context=user_context)
         self.user_id = user_id
         # initialize context load from database
 
     def get_response(self, prompt: str):
-        response = self.llm_manager.get_response(prompt)
+        response = self.llm.get_response(prompt)
         if END_REPORT_TOKEN in response[-10:]:
             response = response.split(END_REPORT_TOKEN)[0]
             self.update_user_context()
         return response
     
     def get_summary(self):
-        return self.llm_manager.get_summary()
+        return self.llm.get_summary()
     
     def update_user_context(self) -> None:
         '''
@@ -32,16 +33,16 @@ class User:
             # ask Or that his function would return None 
             #if there were no new prompts since the last conversation
             return 
-        db.add_symptom(user_id=self.user_id, context=summary)
-        self.llm_manager.update_user_context(db.get_symptoms_for_patient(patient_id=user_id))
+        self.database.add_symptom(user_id=self.user_id, context=summary)
+        self.llm.update_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
 
-    def get_doctor_report(self): 
+    def get_doctor_report(self, reason_for_visit): 
         """
         Makes sure that the user context in the LLM chat is updated
         and creates a doctors report from it.
         """
         self.update_user_context()
-        return self.llm_manager.get_doctor_report()
+        return self.llm.get_doctor_report(reason_for_visit)
     
 
     def get_user_id(self):
