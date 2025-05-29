@@ -39,7 +39,7 @@ class LLMManager:
         "Synthesize this into a coherent note. If the past summary is 'No past medical summary provided.', state that clearly."
     )
 
-    def __init__(self, api_key: str, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
+    def __init__(self, api_key: str=api_key, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
         genai.configure(api_key=api_key)
         self._model_name: str = model_name
         self.formatted_user_context_str: str = self.__format_user_context(user_context)
