@@ -2,11 +2,11 @@ import os
 from uuid import UUID
 
 from dotenv import load_dotenv
-from pydantic.v1 import UUID4
 from supabase import create_client, Client
 from datetime import datetime, UTC
-from typing import Optional, List
+from typing import Optional
 
+GENDERS = ('male', 'female')
 
 load_dotenv()  # Load variables from .env
 
@@ -24,40 +24,64 @@ class Database:
     # Patients
     # ------------
 
-    # def add_patient(self, name: str, age: int, gender: str) -> dict:
-    #     response = self.supabase.table("patients").insert({
-    #         "name": name,
-    #         "age": age,
-    #         "gender": gender
-    #     }).execute()
-    #     if response.error:
-    #         raise Exception(f"Add patient failed: {response.error.message}")
-    #     return response.data[0]
-    #
-    # def update_patient_data(self, patient_id: str, name: Optional[str] = None,
-    #                         age: Optional[int] = None, gender: Optional[str] = None) -> dict:
-    #     update_fields = {k: v for k, v in {
-    #         "name": name,
-    #         "age": age,
-    #         "gender": gender
-    #     }.items() if v is not None}
-    #
-    #     response = self.supabase.table("patients").update(update_fields).eq("id", patient_id).execute()
-    #     if response.error:
-    #         raise Exception(f"Update patient failed: {response.error.message}")
-    #     return response.data[0]
-    #
-    # def get_patient(self, patient_id: UUID) -> dict:
-    #     response = self.supabase.table("patients").select("*").eq("id", patient_id).single().execute()
-    #     if response.error:
-    #         raise Exception(f"Get patient failed: {response.error.message}")
-    #     return response.data
+    def add_patient(self, patient_id: UUID, age: int, gender: str, allergies: list = None, chronic_diseases: list = None, medications: list = None) -> dict:
+        gender = gender.lower()
+        if gender not in GENDERS:
+            raise ValueError(f"Gender should be one of {GENDERS}, but got {gender}")
+        if age < 0:
+            raise ValueError("Age must be a non-negative integer")
+        if allergies is None:
+            allergies = []
+        if chronic_diseases is None:
+            chronic_diseases = []
+        if medications is None:
+            medications = []
+        try:
+            response = self.supabase.table("patients").insert({
+                "patient_id": str(patient_id),
+                "age": age,
+                "gender": gender,
+                "allergies": allergies,
+                "chronic_diseases": chronic_diseases,
+                "medications": medications
+            }).execute()
+        except Exception as e:
+            raise Exception(f"Insert failed: {str(e)}")
+        return response.data
+
+    def update_patient_data(self, patient_id: UUID,
+                            age: Optional[int] = None, gender: Optional[str] = None, allergies: Optional[list] = None,
+                            chronic_diseases: Optional[list] = None, medications: Optional[list] = None) -> dict:
+        if gender is not None and gender not in GENDERS:
+            raise ValueError(f"Gender should be one of {GENDERS}, but got {gender}")
+        if age is not None and age < 0:
+            raise ValueError("Age must be a non-negative integer")
+        update_fields = {k: v for k, v in {
+            "age": age,
+            "gender": gender,
+            "allergies": allergies,
+            "chronic_diseases": chronic_diseases,
+            "medications": medications
+        }.items() if v is not None}
+
+        try:
+            response = self.supabase.table("patients").update(update_fields).eq("patient_id", patient_id).execute()
+        except Exception as e:
+            raise Exception(f"Update failed: {str(e)}")
+        return response.data[0]
+
+    def get_patient(self, patient_id: UUID) -> dict:
+        try:
+            response = self.supabase.table("patients").select("*").eq("patient_id", patient_id).single().execute()
+        except Exception as e:
+            raise Exception(f"Fetch failed: {str(e)}")
+        return response.data
 
     # ------------
     # Symptoms
     # ------------
 
-    def add_symptom(self, patient_id: UUID, symptom_summary: str,
+    def add_symptom(self, patient_id: UUID, symptom_summary: str, title: str,
                     timestamp: Optional[datetime] = None) -> dict:
         if timestamp is None:
             timestamp = datetime.now(UTC)
@@ -65,8 +89,9 @@ class Database:
         try:
             response = self.supabase.table("symptoms").insert({
                 "patient_id": str(patient_id),
-                "symptom_summary": symptom_summary,
-                "timestamp": timestamp.isoformat()
+                "timestamp": timestamp.isoformat(),
+                "title": title,
+                "summary": symptom_summary
             }).execute()
         except Exception as e:
             raise Exception(f"Insert failed: {str(e)}")
