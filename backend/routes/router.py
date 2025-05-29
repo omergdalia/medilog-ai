@@ -19,8 +19,6 @@ api_router = APIRouter()
 users_dict = {}
 
 database = Database()
-class TokenData(BaseModel):
-    token: str
 
 def get_user(user_id: UUID) -> User:
 
@@ -104,7 +102,7 @@ def submit_report(report_id: str, report_data: dict):
     return {"report_id": report_id, "status": "submitted", "data": report_data}
 
 @api_router.post("/auth/google")
-def auth_google(token_data: TokenData, age: int, gender: str, allergies: list = None, chronic_diseases: list = None, medications: list = None):
+def auth_google(token_data: str, age: int, gender: str, allergies: list = str, chronic_diseases: list = str, medications: list = str):
     try:
         # Verify the token
         idinfo = id_token.verify_oauth2_token(
