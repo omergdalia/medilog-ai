@@ -9,12 +9,12 @@ class User:
         # initialize context load from database
         self.database = database
         user_context = database.get_context(int)
-        self.llm = LLMManager(user_context=user_context)
+        self.llm = LLMManager(user_context=user_context, end_text=END_REPORT_TOKEN)
         self.user_id = user_id
         # initialize context load from database
 
     def get_response(self, prompt: str):
-        response = self.llm.get_response(prompt)
+        response = self.llm.get_response(user_text=prompt)
         if END_REPORT_TOKEN in response[-10:]:
             response = response.split(END_REPORT_TOKEN)[0]
             self.update_user_context()
@@ -34,7 +34,7 @@ class User:
             #if there were no new prompts since the last conversation
             return 
         self.database.add_symptom(user_id=self.user_id, context=summary)
-        self.llm.update_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
+        self.llm.extend_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
 
     def get_doctor_report(self, reason_for_visit): 
         """
