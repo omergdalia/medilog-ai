@@ -1,10 +1,15 @@
+import os 
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.router import api_router
 
-app = FastAPI()
+load_dotenv('../.env')
+PORT = int(os.getenv("BACKEND_PORT", 8000))
 
+app = FastAPI()
 app.include_router(api_router, prefix="/api")
 
 # Middleware for CORS - This allows the frontend to communicate with the backend
@@ -19,4 +24,5 @@ app.add_middleware(
 # Entry point for local dev
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False, log_level="debug")
+
+    uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False, log_level="debug")

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 export const sendMessageInChat = async (id: string, message: string): Promise<string> => {
-  const url = `http://localhost:5000/api/response/${id}?prompt=${encodeURIComponent(message)}`;
+  const url = `${process.env.API_BASE}/response/${id}?prompt=${encodeURIComponent(message)}`;
   const res = await axios.get<{ answer: string }>(url, {
       headers: {
         'Accept': 'application/json',
@@ -14,7 +14,7 @@ export const sendMessageInChat = async (id: string, message: string): Promise<st
 
 export const generateDoctorReport = async (id: string, reasonForVisit: string, entries: SymptomEntry[]): Promise<string> => {
   try {
-    const url = `http://localhost:5000/api/doctor_report/${id}?prompt=${encodeURIComponent(reasonForVisit)}`;
+    const url = `${process.env.API_BASE}/doctor_report/${id}?prompt=${encodeURIComponent(reasonForVisit)}`;
     const res = await axios.get<{ answer: string }>(url, {
         headers: {
           'Accept': 'application/json',
