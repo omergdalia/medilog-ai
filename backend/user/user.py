@@ -1,26 +1,24 @@
 from llm.llm_manager import LLMManager
 from db.db import Database
 from uuid import UUID
-
+from datetime import datetime, UTC
 END_REPORT_TOKEN = "<END_REPORT>"
 
-
+# format 
 class User:
     def __init__(self, database: Database, user_id: UUID = None):
         # initialize context load from database
         self.database = database
+        user_context = database.get_symptoms_for_patient(user_id)
+        self.llm = LLMManager(user_context=user_context)
         self.user_id = user_id
-
-        user_context = database.get_symptoms_for_patient(patient_id=self.user_id)
-        self.llm = LLMManager(user_context=user_context, end_text=END_REPORT_TOKEN)
         # initialize context load from database
 
     def get_response(self, prompt: str):
-        response = self.llm.get_response(user_text=prompt)
+        response = self.llm.get_response(prompt)
         if END_REPORT_TOKEN in response[-10:]:
             response = response.split(END_REPORT_TOKEN)[0]
             self.update_user_context()
-        print(f"User {self.user_id} response: {response}")
         return response
     
     def get_summary(self):
@@ -32,12 +30,23 @@ class User:
         report, and updates the llm with the updated user context. 
         '''
         summary = self.get_summary()
+        
         if summary == None: 
             # ask Or that his function would return None 
             #if there were no new prompts since the last conversation
             return 
-        self.database.add_symptom(user_id=self.user_id, context=summary)
-        self.llm.extend_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
+        summary["timestamp"] = datetime.now(UTC).isoformat()
+        # update llm user context to include new summary
+        self.llm.add_to_user_context(summary)
+
+        # add the user_id to the summary
+        summary["patient_id"] = self.user_id
+        # add the summary to the database
+        self.database.add_symptom(timestamp=summary["timestamp"], 
+                                  user_id=self.user_id, 
+                                  symptom_summary=summary["summary"], 
+                                  title=summary["title"] )
+        self.llm.update_user_context(self.database.get_symptoms_for_patient(patient_id=self.user_id))
 
     def get_doctor_report(self, reason_for_visit): 
         """
@@ -47,6 +56,3 @@ class User:
         self.update_user_context()
         return self.llm.get_doctor_report(reason_for_visit)
     
-
-    def get_user_id(self):
-        return self.user_id
