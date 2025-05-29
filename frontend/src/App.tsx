@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SymptomLogger } from './components/SymptomLogger';
 import { ReportGenerator } from './components/ReportGenerator';
 import { type SymptomEntry } from './types';
 import { StethoscopeIcon, Edit3Icon, FileTextIcon } from 'lucide-react';
-import { useLocalStorage } from './hooks/useLocalStorage';
+
+import { getSymptomHistory } from './services/apiService';
 
 enum AppView {
   Logger,
@@ -14,7 +15,6 @@ enum AppView {
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.Logger);
-  const [symptomEntries, setSymptomEntries] = useLocalStorage<SymptomEntry[]>('symptomEntries', []);
 
   const renderView = () => {
     switch (currentView) {
@@ -23,7 +23,7 @@ const App: React.FC = () => {
       case AppView.Reporter:
         return <ReportGenerator />;
       case AppView.History:
-        return <SymptomHistoryView symptomEntries={symptomEntries} />;
+        return <SymptomHistoryView />;
       default:
         return <SymptomLogger />;
     }
@@ -96,48 +96,46 @@ const App: React.FC = () => {
 };
 
 
-const SymptomHistoryView: React.FC<{ symptomEntries: SymptomEntry[] }> = ({ symptomEntries }) => {
-  if (symptomEntries.length === 0) {
+const SymptomHistoryView: React.FC = () => {
+
+  const [symptomEntries, setSymptomEntries] = useState<SymptomEntry[]>([]);
+  useEffect(() => {
+    getSymptomHistory('00000000-0000-0000-0000-000000000000').then(entries => setSymptomEntries(entries));
+  }, []);
+
+if (symptomEntries.length === 0) {
     return <div className="text-center text-slate-500 py-10">No symptom entries logged yet.</div>;
   }
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-indigo-700 mb-6 border-b pb-2">Symptom History</h2>
-      {symptomEntries.slice().reverse().map(entry => ( // Show newest first
-        <div key={entry.id} className="bg-slate-50 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-indigo-600">
-            Entry: {new Date(entry.timestamp).toLocaleString()}
-          </h3>
-          <p className="text-sm text-slate-500 mb-2">ID: {entry.id}</p>
-          <div className="mt-3 space-y-2">
-            <p><strong className="font-medium text-slate-700">Initial Symptom:</strong> {entry.initialSymptom}</p>
-            <details className="text-sm">
-              <summary className="cursor-pointer text-indigo-500 hover:text-indigo-700 font-medium">
-                View Full Conversation ({entry.conversation.length} messages)
-              </summary>
-              <div className="mt-2 space-y-2 pl-4 border-l-2 border-indigo-200">
-                {entry.conversation.map((msg, index) => (
-                  <div key={index} className={`p-2 rounded-md ${msg.sender === 'user' ? 'bg-sky-100 text-sky-800' : 'bg-indigo-100 text-indigo-800'}`}>
-                    <p className="font-semibold capitalize">{msg.sender}:</p>
-                    <p>{msg.text}</p>
-                    <p className="text-xs text-slate-400">{new Date(msg.timestamp).toLocaleTimeString()}</p>
-                  </div>
-                ))}
-              </div>
-            </details>
-            {entry.finalSummary && (
-              <p className="mt-2 italic text-slate-600"><strong className="font-medium text-slate-700">AI Summary:</strong> {entry.finalSummary}</p>
-            )}
+      {symptomEntries.slice().map((entry, index) => (
+        <div
+          key={index}
+          className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xl font-semibold text-slate-800">{entry.title}</p>
+            <p className="text-sm text-slate-500 mt-1 sm:mt-0">
+              {new Date(entry.timestamp).toLocaleString()}
+            </p>
           </div>
+
+          <details className="mt-4 group">
+            <summary className="cursor-pointer text-indigo-600 hover:text-indigo-800 font-medium transition">
+              <span className="underline underline-offset-2 group-open:hidden">View Summary</span>
+              <span className="underline underline-offset-2 hidden group-open:inline">Hide Summary</span>
+            </summary>
+            <div className="mt-2 bg-indigo-50 text-slate-800 p-4 rounded-lg border border-indigo-100">
+              {entry.summary}
+            </div>
+          </details>
         </div>
       ))}
     </div>
   );
 };
-
-
-
 
 export default App;
     

@@ -29,12 +29,14 @@ class User:
         This function updates the database, asks it for a new 
         report, and updates the llm with the updated user context. 
         '''
-        summary = self.get_summary()
+        try:
+            summary = self.get_summary()
+        except ValueError as e:
+            # if the summary is None, it means that there were no new prompts
+            # since the last conversation, so we don't need to update the database
+            return
         
-        if summary == None: 
-            # ask Or that his function would return None 
-            #if there were no new prompts since the last conversation
-            return 
+        
         summary["timestamp"] = dt.now(UTC).isoformat()
         # update llm user context to include new summary
         self.llm.extend_user_context([summary])

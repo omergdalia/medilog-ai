@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { type SymptomEntry, type ChatMessage } from '../types';
+import { type ChatMessage } from '../types';
 import { sendMessageInChat } from '../services/apiService';
 // Fix: Import Edit3Icon
 import { SendIcon, RotateCwIcon, SaveIcon, AlertCircleIcon, MessageSquareIcon, UserIcon, ZapIcon, Edit3Icon, InfoIcon } from 'lucide-react';
@@ -32,7 +32,7 @@ export const SymptomLogger: React.FC = () => {
   const [stage, setStage] = useState<LoggingStage>(LoggingStage.InitialInput);
   
   const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
-  const MAX_AI_TURNS = 3; // Initial + 2 follow-ups + 1 activity question
+  const MAX_AI_TURNS = 50; // Initial + 2 follow-ups + 1 activity question
   const aiTurnCountRef = useRef<number>(0);
 
   useEffect(() => {

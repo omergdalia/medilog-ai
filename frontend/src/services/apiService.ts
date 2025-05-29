@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import type { SymptomEntry } from '../types.ts';
 
 export const sendMessageInChat = async (id: string, message: string): Promise<string> => {
   const url = `${process.env.API_BASE}/response/${id}?prompt=${encodeURIComponent(message)}`;
@@ -53,5 +53,24 @@ export const saveSymptom = async (id: string) => {
     }
   } catch (error) {
     throw new Error("Failed to check symptom history: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+};
+
+export const getSymptomHistory = async (id: string): Promise<SymptomEntry[]> => {
+  const url = `${process.env.API_BASE}/get_history/${id}`;
+  try {
+    const res = await axios.get<SymptomEntry[]>(url, {headers: {'Accept': 'application/json'}});
+    if (res.status >= 200 && res.status < 300) {
+      return res.data.map(entry => ({
+        'timestamp': new Date(entry.timestamp),
+        'title': entry.title,
+        'summary': entry.summary
+      }));
+    } else {
+      throw new Error(`Request failed with status: ${res.status}`);
+    }
+  } catch (error) {
+    console.error("Error sending message to Gemini chat:", error);
+    throw new Error("Failed to generate doctor report: " + (error instanceof Error ? error.message : "Unknown error"));
   }
 };

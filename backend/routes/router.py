@@ -65,7 +65,7 @@ def get_history(user_id: UUID) -> bool:
     Checks if the user has any recorded symptoms in the database.
     Returns True if there are symptoms, False otherwise.
     """
-    return database.get_symptoms_for_patient(patient_id=user_id)
+    return JSONResponse(database.get_symptoms_for_patient(patient_id=user_id))
 
 # example endpoint -simple GET
 

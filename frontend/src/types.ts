@@ -6,10 +6,8 @@ export interface ChatMessage {
 }
 
 export interface SymptomEntry {
-  id: string;
   timestamp: Date;
-  initialSymptom: string;
-  conversation: ChatMessage[];
-  finalSummary?: string; 
+  title: string;
+  summary: string; 
 }
     
