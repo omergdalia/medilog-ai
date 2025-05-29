@@ -11,5 +11,5 @@ To Create backend envieronment:
 
 TO run app:
 ```
-python -m app
+python -m app.py
 ```

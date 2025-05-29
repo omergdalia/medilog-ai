@@ -1,6 +1,6 @@
 # API endpoints for FastAPI
 from fastapi import APIRouter
-# from llm.llm_manager import LLMManager
+from llm.llm_manager import LLMManager
 
 api_router = APIRouter()
 
