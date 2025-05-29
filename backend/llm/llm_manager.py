@@ -1,6 +1,12 @@
 import google.generativeai as genai
 import os
 from typing import Optional, List, Any
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+# Ensure the API key is set in the environment
+api_key = os.getenv('GENAI_API_KEY')
 
 class LLMManager:
     _NO_CONTEXT_STRING = "No past medical summary provided."
@@ -25,7 +31,7 @@ class LLMManager:
         "Synthesize this into a coherent note. If the past summary is 'No past medical summary provided.', state that clearly."
     )
 
-    def __init__(self, api_key: str, model_name: str = 'gemini-1.5-flash-latest', user_context: Any = None, end_text: str = "FINISHED"):
+    def __init__(self, api_key: str, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
         genai.configure(api_key=api_key)
         self._model_name: str = model_name
         self.formatted_user_context_str: str = self.__format_user_context(user_context)
