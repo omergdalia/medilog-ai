@@ -1,5 +1,8 @@
 # API endpoints for FastAPI
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
+# from pydantic import BaseModel
+
 from llm.llm_manager import LLMManager
 from uuid import uuid4, UUID
 from user.user import User
@@ -24,11 +27,15 @@ def get_user(user_id: UUID) -> User:
 
 @api_router.get("/response/{user_id}")
 def get_response(user_id: UUID, prompt: str):
-    return get_user(user_id=user_id).get_response(prompt)
+    # print("Received prompt:", prompt)
+    answer = get_user(user_id=user_id).get_response(prompt)
+    return JSONResponse(content={'answer': answer})
 
 @api_router.get("/doctor_report/{user_id}")
-def get_doctors_report(user_id: UUID, reason_for_visit: str):
-    get_user(user_id=user_id).get_doctor_report(reason_for_visit)
+def get_doctors_report(user_id: UUID, prompt: str):
+    print("Received prompt:", prompt)
+    answer = get_user(user_id=user_id).get_doctor_report(prompt)
+    return JSONResponse(content={'answer': answer})
 
 
 # example endpoint -simple GET

@@ -34,7 +34,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ symptomEntries
     try {
       // For simplicity, send all entries. The AI prompt will guide relevance.
       // In a more complex app, filtering or selection could happen here.
-      const report = await generateDoctorReport(1, reasonForVisit, symptomEntries);
+      const report = await generateDoctorReport("00000000-0000-0000-0000-000000000000", reasonForVisit, symptomEntries);
       setGeneratedReport(report);
     } catch (err) {
       console.error(err);

@@ -1,16 +1,18 @@
 from llm.llm_manager import LLMManager
 from db.db import Database
+from uuid import UUID
 
 END_REPORT_TOKEN = "<END_REPORT>"
 
 
 class User:
-    def __init__(self, database: Database, user_id: int = None):
+    def __init__(self, database: Database, user_id: UUID = None):
         # initialize context load from database
         self.database = database
-        user_context = database.get_context(int)
-        self.llm = LLMManager(user_context=user_context, end_text=END_REPORT_TOKEN)
         self.user_id = user_id
+
+        user_context = database.get_symptoms_for_patient(patient_id=self.user_id)
+        self.llm = LLMManager(user_context=user_context, end_text=END_REPORT_TOKEN)
         # initialize context load from database
 
     def get_response(self, prompt: str):
@@ -18,6 +20,7 @@ class User:
         if END_REPORT_TOKEN in response[-10:]:
             response = response.split(END_REPORT_TOKEN)[0]
             self.update_user_context()
+        print(f"User {self.user_id} response: {response}")
         return response
     
     def get_summary(self):

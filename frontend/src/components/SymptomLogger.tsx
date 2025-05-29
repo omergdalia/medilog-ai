@@ -17,7 +17,13 @@ enum LoggingStage {
   Error,
   Done
 }
-  
+
+// create uuid with library for uuids
+// For simplicity, using a placeholder UUID. In production, use a library like uuid.
+// import { v4 as uuidv4 } from 'uuid';
+
+
+const MY_UUID: string = "00000000-0000-0000-0000-000000000000";
 
 export const SymptomLogger: React.FC<SymptomLoggerProps> = ({ addSymptomEntry }) => {
   const [initialSymptom, setInitialSymptom] = useState<string>('');
@@ -49,7 +55,7 @@ export const SymptomLogger: React.FC<SymptomLoggerProps> = ({ addSymptomEntry })
       const userMessage: ChatMessage = { sender: 'user', text: initialSymptom, timestamp: new Date() };
       setConversation([userMessage]);
       
-      const aiResponseText = await sendMessageInChat(1, initialSymptom);
+      const aiResponseText = await sendMessageInChat(MY_UUID, initialSymptom);
       setConversation(prev => [...prev, { sender: 'ai', text: aiResponseText, timestamp: new Date() }]);
       aiTurnCountRef.current++;
     } catch (err) {
@@ -71,7 +77,7 @@ export const SymptomLogger: React.FC<SymptomLoggerProps> = ({ addSymptomEntry })
     setCurrentUserMessage('');
 
     try {
-      const aiResponseText = await sendMessageInChat(1, userMessage.text);
+      const aiResponseText = await sendMessageInChat(MY_UUID, userMessage.text);
       setConversation(prev => [...prev, { sender: 'ai', text: aiResponseText, timestamp: new Date() }]);
       aiTurnCountRef.current++;
       if (aiTurnCountRef.current >= MAX_AI_TURNS) {
