@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -23,9 +23,6 @@ function loadSharedEnv(envPath: string): Record<string, string> {
 
 export default defineConfig(({mode}) => {
   const sharedEnv = loadSharedEnv(path.resolve(__dirname, '../.env'));
-  const sharedEnv2 = loadEnv(mode, path.resolve(__dirname, '..'));
-  console.log('Shared Environment Variables:', sharedEnv);
-  console.log('Mode Environment Variables:', sharedEnv2);
 
   return {
     plugins: [react(), tailwindcss()],
@@ -37,6 +34,7 @@ export default defineConfig(({mode}) => {
     define: {
       // 'process.env.BACKEND_PORT': parseInt(sharedEnv.VITE_BACKEND_PORT) || 8000,
       'process.env.API_BASE': JSON.stringify(`http://localhost:${sharedEnv.VITE_BACKEND_PORT || '8000'}/api`),
+        'process.env.GOOGLE_CLIENT_ID': JSON.stringify(sharedEnv.VITE_GOOGLE_CLIENT_ID || ''),
     },
   };
 });
