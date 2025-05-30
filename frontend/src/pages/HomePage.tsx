@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Edit3Icon, StethoscopeIcon, FileTextIcon } from 'lucide-react';
 import { SymptomLogger } from '../components/SymptomLogger';
 import { ReportGenerator } from '../components/ReportGenerator';
@@ -31,6 +31,14 @@ const NavButton: React.FC<{
 
 const HomePage:React.FC = () => {
     const [currentView, setCurrentView] = useState<AppView>(AppView.Logger);
+    const [isHistory, setIsHistory] = useState<boolean>(false);
+
+    useEffect(() => {
+      if (currentView === AppView.History) {
+        setIsHistory(true);
+      }        
+    }, [currentView]);
+
 
     const renderView = () => {
         switch (currentView) {
@@ -39,7 +47,7 @@ const HomePage:React.FC = () => {
           case AppView.Reporter:
             return <ReportGenerator />;
           case AppView.History:
-            return <SymptomHistoryView />;
+            return <SymptomHistoryView isSelected={isHistory} />;
           default:
             return <SymptomLogger />;
         }

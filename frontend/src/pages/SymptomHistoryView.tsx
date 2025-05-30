@@ -3,12 +3,13 @@ import { getSymptomHistory } from '../services/apiService';
 import { type SymptomResponse } from '../types.ts';
 
 
-const SymptomHistoryView: React.FC = () => {
+const SymptomHistoryView: React.FC<{isSelected: boolean}> = ({isSelected}) => {
 
   const [symptomEntries, setSymptomEntries] = useState<SymptomResponse[]>([]);
+  
   useEffect(() => {
     getSymptomHistory(`${process.env.UUID}`).then(entries => setSymptomEntries(entries));
-  }, []);
+  }, [isSelected]);
 
 if (symptomEntries.length === 0) {
     return <div className="text-center text-slate-500 py-10">No symptom entries logged yet.</div>;

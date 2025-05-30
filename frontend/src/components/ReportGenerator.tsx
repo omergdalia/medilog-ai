@@ -20,7 +20,7 @@ const formatReport = (report: DoctorReport): string => {
 
 export const ReportGenerator: React.FC = () => {
   const [reasonForVisit, setReasonForVisit] = useState<string>('');
-  const [generatedReport, setGeneratedReport] = useState<DoctorReport>(emptyReport);
+  const [generatedReport, setGeneratedReport] = useState<DoctorReport|null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export const ReportGenerator: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
-    setGeneratedReport(emptyReport);
+    setGeneratedReport(null);
 
     try {
       const report = await generateDoctorReport(`${process.env.UUID}`, reasonForVisit);
@@ -106,7 +106,7 @@ export const ReportGenerator: React.FC = () => {
         </div>
       )}
 
-      {generatedReport && !isLoading && (
+      {!!generatedReport && !isLoading && (
         <div className="mt-6 p-6 bg-sky-50 border border-sky-200 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold text-sky-700 mb-4">Generated Doctor Visit Summary</h3>
           <div 
