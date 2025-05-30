@@ -1,51 +1,11 @@
 
-import React, { useState } from 'react';
-import { SymptomLogger } from './components/SymptomLogger';
-import { ReportGenerator } from './components/ReportGenerator';
-import SymptomHistoryView from './pages/SymptomHistoryView';
-import { StethoscopeIcon, Edit3Icon, FileTextIcon } from 'lucide-react';
+import React from 'react';
+import { StethoscopeIcon} from 'lucide-react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import OpeningPage from "./pages/OpeningPage.tsx";
+import HomePage from './pages/HomePage.tsx';
 
-enum AppView {
-  Logger,
-  Reporter,
-  History
-}
-
-const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<AppView>(AppView.Logger);
-
-  const renderView = () => {
-    switch (currentView) {
-      case AppView.Logger:
-        return <SymptomLogger />;
-      case AppView.Reporter:
-        return <ReportGenerator />;
-      case AppView.History:
-        return <SymptomHistoryView />;
-      default:
-        return <SymptomLogger />;
-    }
-  };
-  
-  const NavButton: React.FC<{
-    Icon: React.ElementType;
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-  }> = ({ Icon, label, isActive, onClick }) => (
-    <button
-      onClick={onClick}
-      className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400
-        ${isActive 
-          ? 'bg-indigo-600 text-white shadow-lg transform scale-105' 
-          : 'bg-white text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 shadow-sm hover:shadow-md'
-        }`}
-    >
-      <Icon className="w-5 h-5" />
-      <span>{label}</span>
-    </button>
-  );
-
+const App: React.FC = () => {  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 flex flex-col items-center p-4 md:p-8">
       <header className="w-full max-w-4xl mb-8 text-center">
@@ -59,36 +19,12 @@ const App: React.FC = () => {
           Your intelligent partner for tracking symptoms and preparing for doctor visits.
         </p>
       </header>
-
-      <nav className="w-full max-w-md mb-8 p-2 bg-slate-200/50 rounded-xl shadow-md flex justify-around space-x-2 backdrop-blur-sm">
-        <NavButton 
-          Icon={Edit3Icon} 
-          label="Log Symptoms" 
-          isActive={currentView === AppView.Logger}
-          onClick={() => setCurrentView(AppView.Logger)} 
-        />
-        <NavButton 
-          Icon={FileTextIcon} 
-          label="Doctor Report" 
-          isActive={currentView === AppView.Reporter}
-          onClick={() => setCurrentView(AppView.Reporter)} 
-        />
-         <NavButton 
-          Icon={FileTextIcon} 
-          label="View History" 
-          isActive={currentView === AppView.History}
-          onClick={() => setCurrentView(AppView.History)} 
-        />
-      </nav>
-
-      <main className="w-full max-w-3xl bg-white p-6 md:p-8 rounded-xl shadow-2xl">
-        {renderView()}
-      </main>
-      
-      <footer className="mt-12 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} MediLogAI. For demonstration purposes only. Not for real medical use.</p>
-        <p>Ensure your <code>API_KEY</code> environment variable is set for AI features.</p>
-      </footer>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<OpeningPage />} />
+          <Route path="/" element={<HomePage />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 };

@@ -33,7 +33,6 @@ def get_user(user_id: UUID) -> User:
 
 @api_router.get("/response/{user_id}")
 def get_response(user_id: UUID, prompt: str):
-    # print("Received prompt:", prompt)
     answer, stop = get_user(user_id=user_id).get_response(prompt)
     return JSONResponse(content={'answer': answer, 'stop': stop})
 
@@ -43,12 +42,12 @@ def save_summary(user_id: UUID):
     get_user(user_id=user_id).save_summary_and_update()
     return JSONResponse(content={'status': 'saved'})
 
+
 @api_router.get("/doctor_report/{user_id}")
 def get_doctors_report(user_id: UUID, prompt: str):
-    print("Received prompt:", prompt)
-
     answer = get_user(user_id=user_id).get_doctor_report(prompt)
     return JSONResponse(content={'answer': answer})
+
 
 @api_router.get("/has_history/{user_id}")
 def has_history(user_id: UUID) -> bool:
@@ -59,33 +58,18 @@ def has_history(user_id: UUID) -> bool:
     history = database.get_symptoms_for_patient(patient_id=user_id)
     return not len(history) == 0
 
+
 @api_router.get("/get_history/{user_id}")
 def get_history(user_id: UUID) -> bool:
     """
     Checks if the user has any recorded symptoms in the database.
     Returns True if there are symptoms, False otherwise.
     """
+    symptoms = database.get_symptoms_for_patient(patient_id=user_id)
+    if not symptoms:
+        raise HTTPException(status_code=404, detail="No symptoms found for this user.")
     return JSONResponse(database.get_symptoms_for_patient(patient_id=user_id))
 
-# example endpoint -simple GET
-
-@api_router.get("/status")
-def status():
-    return {"status": "ok"}
-# example endpoint - GET with url parameter (e.g., /health/1)
-
-@api_router.get("/health/{id}")
-def get_health(id: int):
-    return {"status": "healthy", "id": id}
-# example endpoint - GET with query parameters (e.g., /get/report?report_id=123)
-
-
-@api_router.get("/get/report")
-def get_report(report_id: str):
-    # Logic to retrieve a report based on the report_id
-    # This could involve fetching from a database or other storage
-    return {"report_id": report_id, "status": "retrieved"}
-# example endpoint - simple POST, with JSON body
 
 @api_router.post("/llm")
 def llm_endpoint(input_data: dict):
