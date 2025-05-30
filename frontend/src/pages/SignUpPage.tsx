@@ -6,6 +6,7 @@ export default function SignupPage() {
   const [allergies, setAllergies] = useState([""]);
   const [diseases, setDiseases] = useState([""]);
   const [medications, setMedications] = useState([""]);
+  const user_email = localStorage.getItem("user_email") || "";
 
   const handleListChange = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -26,6 +27,7 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
+      user_email,
       age,
       gender,
       allergies: allergies.filter((a) => a.trim() !== ""),
@@ -53,14 +55,22 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4">
         <h2 className="text-2xl font-bold mb-4 text-center">Complete Your Profile</h2>
 
-        <input
-          type="number"
-          placeholder="Age"
-          value={age ?? ""}
-          onChange={(e) => setAge(Number(e.target.value))}
-          className="w-full p-2 border rounded"
-          required
-        />
+
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={age}
+      onChange={(e) => {
+        const val = e.target.value;
+        // Allow only digits or empty input
+        if (/^\d*$/.test(val)) {
+          setAge(val);
+        }
+      }}
+      placeholder="Age"
+      className="w-full p-2 border rounded appearance-none"
+    />
 
         <select
           value={gender}

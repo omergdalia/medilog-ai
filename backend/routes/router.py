@@ -1,10 +1,11 @@
 # API endpoints for FastAPI
 from http.client import HTTPException
+from typing import List
 
 import db
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-# from pydantic import BaseModel
+from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
 
@@ -17,8 +18,16 @@ from user.user import User
 from db.db import Database
 api_router = APIRouter()
 users_dict = {}
+class SignupData(BaseModel):
+    mail: str
+    age: int
+    gender: str
+    allergies: List[str]
+    chronic_diseases: List[str]
+    medications: List[str]
 
 database = Database()
+
 
 def get_user(user_id: UUID) -> User:
 
@@ -144,3 +153,14 @@ def auth_google(token_data: str, age: int, gender: str, allergies: list = str, c
         return {"email": email, "name": name, "user_id": user_id}
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+@api_router.post("auth/complete_signup")
+def complete_signup(data: SignupData):
+    # Might need to generate a uuid myself
+
+    database.add_patient(age=data.age, gender=data.gender,
+                         allergies=data.allergies, chronic_diseases=data.chronic_diseases,
+                         medications=data.medications, patient_id=UUID(), mail=data.mail)
+
+    # Return a simple confirmation response
+    return {"message": "Signup data received successfully"}
