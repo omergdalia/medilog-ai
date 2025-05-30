@@ -24,7 +24,7 @@ class Database:
     # Patients
     # ------------
 
-    def add_patient(self, patient_id: UUID, age: int, gender: str, allergies: list = None, chronic_diseases: list = None, medications: list = None) -> dict:
+    def add_patient(self, patient_id: UUID, email: str, age: int, gender: str, allergies: list = None, chronic_diseases: list = None, medications: list = None) -> dict:
         gender = gender.lower()
         if gender not in GENDERS:
             raise ValueError(f"Gender should be one of {GENDERS}, but got {gender}")
@@ -39,6 +39,7 @@ class Database:
         try:
             response = self.supabase.table("patients").insert({
                 "patient_id": str(patient_id),
+                'email': email,
                 "age": age,
                 "gender": gender,
                 "allergies": allergies,
@@ -47,9 +48,9 @@ class Database:
             }).execute()
         except Exception as e:
             raise Exception(f"Insert failed: {str(e)}")
-        return response.data
+        return response.data[0]["patient_id"]
 
-    def update_patient_data(self, patient_id: UUID,
+    def update_patient_data(self, patient_id: UUID, email: Optional[str] = None,
                             age: Optional[int] = None, gender: Optional[str] = None, allergies: Optional[list] = None,
                             chronic_diseases: Optional[list] = None, medications: Optional[list] = None) -> dict:
         if gender is not None and gender not in GENDERS:
@@ -57,6 +58,7 @@ class Database:
         if age is not None and age < 0:
             raise ValueError("Age must be a non-negative integer")
         update_fields = {k: v for k, v in {
+            "email": email,
             "age": age,
             "gender": gender,
             "allergies": allergies,
@@ -112,6 +114,17 @@ class Database:
         except Exception as e:
             raise Exception(f"Fetch failed: {str(e)}")
         return response.data  # List of rows
+
+    def get_patient_by_email(self, email: str) -> UUID:
+        """
+        Fetch a user by their email address.
+        Returns None if no user is found.
+        """
+        try:
+            response = self.supabase.table("patients").select("*").eq("email", email).single().execute()
+            return UUID(response.data["patient_id"])
+        except Exception as e:
+            raise Exception(f"Fetch failed: {str(e)}")
 
 # Example usage:
 # db = Database(url="...", key="...")

@@ -10,19 +10,25 @@ SUMMARIES = {
 }
 
 
-def add_symptom(db, title):
+def add_symptom(db, patient, title):
     # Test adding a symptom
-    added_symptom = db.add_symptom(patient_id=PATIENT_ID, title=title, symptom_summary=SUMMARIES[title])
+    added_symptom = db.add_symptom(patient_id=patient, title=title, symptom_summary=SUMMARIES[title])
     print("Added Symptom:", added_symptom)
     # Test getting symptoms for the patient
-    symptoms = db.get_symptoms_for_patient(patient_id=PATIENT_ID)
+    symptoms = db.get_symptoms_for_patient(patient_id=patient)
     print("Symptoms for Patient:", symptoms)
 
 
 def tests():
     db = Database()
+    # Test adding a patient
+    try:
+        patient = db.add_patient(patient_id=PATIENT_ID, email="aaa@gmail.com", age=50, gender='male')
+    except Exception as e:
+        patient = db.get_patient_by_email('aaa@gmail.com')
+    print(patient)
     for title in SUMMARIES.keys():
-        add_symptom(db, title)
+        add_symptom(db, patient, title)
     # Test getting the patient
     fetched_patient = db.get_patient(patient_id=PATIENT_ID)
     print(fetched_patient)
