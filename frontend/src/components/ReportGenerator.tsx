@@ -73,6 +73,12 @@ export const ReportGenerator: React.FC = () => {
           value={reasonForVisit}
           onChange={(e) => setReasonForVisit(e.target.value)}
           placeholder="e.g., Annual check-up, follow-up on persistent cough, new concerns about joint pain."
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault(); // Prevent newline insertion
+              handleGenerateReport();
+            }
+          }}
           rows={3}
           className="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white text-slate-900"
           disabled={isLoading || !allowReporting}

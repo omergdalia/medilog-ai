@@ -139,6 +139,12 @@ export const SymptomLogger: React.FC = () => {
             value={initialSymptom}
             onChange={(e) => setInitialSymptom(e.target.value)}
             placeholder="e.g., 'Sharp pain in my lower back for 3 days,' or 'Feeling constantly tired and having trouble sleeping.'"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent newline
+                handleStartSymptomAnalysis();
+              }
+            }}
             rows={3}
             className="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white text-slate-900"
             disabled={isLoading}
