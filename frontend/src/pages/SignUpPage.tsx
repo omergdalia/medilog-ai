@@ -6,7 +6,7 @@ export default function SignupPage() {
   const [allergies, setAllergies] = useState([""]);
   const [diseases, setDiseases] = useState([""]);
   const [medications, setMedications] = useState([""]);
-  const user_email = localStorage.getItem("user_email") || "";
+  const userEmail = localStorage.getItem("userEmail") || "";
 
   const handleListChange = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -27,7 +27,7 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
-      user_email,
+      'mail': userEmail,
       age,
       gender,
       allergies: allergies.filter((a) => a.trim() !== ""),
@@ -36,7 +36,7 @@ export default function SignupPage() {
     };
 
     try {
-      const res = await fetch("/api/auth/complete-signup", {
+      const res = await fetch(`${process.env.API_BASE}/api/auth/complete_signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

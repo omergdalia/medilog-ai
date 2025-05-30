@@ -90,7 +90,12 @@ export default function OpeningPage() {
           }
           const userInfo = await userInfoResponse.json();
           email = userInfo?.email;
-          if(email) console.log("Email from userinfo endpoint:", email);
+          
+          if(email)
+            {
+              localStorage.setItem("userEmail", email || "");
+              console.log("Email from userinfo endpoint:", email);
+            }
         }
 
         if (email) {
