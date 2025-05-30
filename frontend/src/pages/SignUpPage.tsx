@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignupPage() {
   const [age, setAge] = useState<number | undefined>();
@@ -7,7 +9,7 @@ export default function SignupPage() {
   const [diseases, setDiseases] = useState([""]);
   const [medications, setMedications] = useState([""]);
   const userEmail = localStorage.getItem("userEmail") || "";
-
+  const navigate = useNavigate();
   const handleListChange = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
     index: number,
@@ -36,18 +38,23 @@ export default function SignupPage() {
     };
 
     try {
-      const res = await fetch(`${process.env.API_BASE}/api/auth/complete_signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const url = `${process.env.API_BASE}/auth/complete_signup`;
+      const res = await axios.post(url, payload, {
+      headers: { "Content-Type": "application/json" },
       });
-
-      const data = await res.json();
+      const data = res.data;
       console.log("Signup success:", data);
-      // Redirect or show success
+      navigate("/"); // Redirect to home page after successful signup
     } catch (error) {
       console.error("Signup error:", error);
     }
+
+    //   const data = await res.json();
+    //   console.log("Signup success:", data);
+    //   // Redirect or show success
+    // } catch (error) {
+    //   console.error("Signup error:", error);
+    // }
   };
 
   return (

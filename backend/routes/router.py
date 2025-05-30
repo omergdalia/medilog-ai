@@ -154,13 +154,14 @@ def auth_google(token_data: str, age: int, gender: str, allergies: list = str, c
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-@api_router.post("auth/complete_signup")
+@api_router.post("/auth/complete_signup")
 def complete_signup(data: SignupData):
     # Might need to generate a uuid myself
 
+
     database.add_patient(age=data.age, gender=data.gender,
                          allergies=data.allergies, chronic_diseases=data.chronic_diseases,
-                         medications=data.medications, patient_id=UUID(), mail=data.mail)
+                         medications=data.medications, patient_id=uuid4(), email=data.mail)
 
     # Return a simple confirmation response
     return {"message": "Signup data received successfully"}
