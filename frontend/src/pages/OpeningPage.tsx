@@ -17,8 +17,8 @@ export default function OpeningPage() {
     }
 
     window.google.accounts.id.initialize({
-      client_id: "GOOGLE_CLIENT_ID",
-      callback: handleCredentialResponse,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    callback: handleCredentialResponse,
     });
   }, []);
 
@@ -26,7 +26,7 @@ export default function OpeningPage() {
     const idToken = response.credential;
 
     try {
-      const res = await fetch("/api/auth/google-signin", {
+      const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
