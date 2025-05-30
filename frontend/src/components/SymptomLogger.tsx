@@ -54,7 +54,7 @@ export const SymptomLogger: React.FC = () => {
       setConversation([userMessage]);
       
       const aiResponseText = await sendMessageInChat(MY_UUID, initialSymptom);
-      setConversation(prev => [...prev, { sender: 'ai', text: aiResponseText, timestamp: new Date() }]);
+      setConversation(prev => [...prev, { sender: 'ai', text: aiResponseText.answer, timestamp: new Date() }]);
       aiTurnCountRef.current++;
     } catch (err) {
       console.error(err);
@@ -75,13 +75,14 @@ export const SymptomLogger: React.FC = () => {
     setCurrentUserMessage('');
 
     try {
-      const aiResponseText = await sendMessageInChat(MY_UUID, userMessage.text);
-      setConversation(prev => [...prev, { sender: 'ai', text: aiResponseText, timestamp: new Date() }]);
-      aiTurnCountRef.current++;
-      if (aiTurnCountRef.current >= MAX_AI_TURNS) {
+      const aiResponseResponse = await sendMessageInChat(MY_UUID, userMessage.text);
+      if (aiResponseResponse.stop) {
         // Optionally, can add a "final thoughts" AI message or directly enable saving
         setConversation(prev => [...prev, {sender: 'ai', text: "Thank you for the information. You can now save this entry.", timestamp: new Date()}]);
         setStage(LoggingStage.Saving);
+      } else {
+          setConversation(prev => [...prev, { sender: 'ai', text: aiResponseResponse.answer, timestamp: new Date() }]);
+          aiTurnCountRef.current++;
       }
     } catch (err) {
       console.error(err);

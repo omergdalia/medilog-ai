@@ -21,9 +21,8 @@ def add_symptom(db, title):
 
 def tests():
     db = Database()
-    add_symptom(db, 'headache')
-    add_symptom(db, 'stomachache')
-    add_symptom(db, 'ear_pain')
+    for title in SUMMARIES.keys():
+        add_symptom(db, title)
     # Test getting the patient
     fetched_patient = db.get_patient(patient_id=PATIENT_ID)
     print(fetched_patient)

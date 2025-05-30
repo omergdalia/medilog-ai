@@ -6,7 +6,7 @@ export const sendMessageInChat = async (id: string, message: string): Promise<st
   try {
     const res = await axios.get<{ answer: string }>(url, {headers: {'Accept': 'application/json'}});
     if (res.status >= 200 && res.status < 300) {
-        return res.data.answer;
+        return res.data;
     } else {
       throw new Error(`Request failed with status: ${res.status}`);
     }

@@ -10,16 +10,17 @@ class User:
         # initialize context load from database
         self.database = database
         user_context = database.get_symptoms_for_patient(user_id)
-        self.llm = LLMManager(user_context=user_context)
+        self.llm = LLMManager(user_context=user_context, end_text=END_REPORT_TOKEN)
         self.user_id = user_id
         # initialize context load from database
 
     def get_response(self, prompt: str):
         response = self.llm.get_response(prompt)
-        if END_REPORT_TOKEN in response[-10:]:
+        stop_flag = False
+        if END_REPORT_TOKEN in response:
+            stop_flag = True
             response = response.split(END_REPORT_TOKEN)[0]
-            self.save_summary_and_update()
-        return response
+        return response, stop_flag
     
     def get_summary(self):
         return self.llm.get_summary()

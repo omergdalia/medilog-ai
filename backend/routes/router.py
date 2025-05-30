@@ -34,8 +34,8 @@ def get_user(user_id: UUID) -> User:
 @api_router.get("/response/{user_id}")
 def get_response(user_id: UUID, prompt: str):
     # print("Received prompt:", prompt)
-    answer = get_user(user_id=user_id).get_response(prompt)
-    return JSONResponse(content={'answer': answer})
+    answer, stop = get_user(user_id=user_id).get_response(prompt)
+    return JSONResponse(content={'answer': answer, 'stop': stop})
 
 
 @api_router.post("/save_summary/{user_id}")
