@@ -14,7 +14,7 @@ class User:
         self.user_id = user_id
         # initialize context load from database
 
-    def get_response(self, prompt: str):
+    def get_response(self, prompt: str) -> tuple[str, bool]:
         response = self.llm.get_response(prompt)
         stop_flag = False
         if END_REPORT_TOKEN in response:

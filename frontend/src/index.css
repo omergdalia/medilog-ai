@@ -25,6 +25,7 @@ a:hover {
 }
 
 body {
+  font-family: 'Inter', sans-serif;
   margin: 0;
   display: flex;
   place-items: center;
@@ -54,6 +55,21 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+/* Custom scrollbar for chat log */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 @media (prefers-color-scheme: light) {

@@ -3,11 +3,24 @@ import React, { useMemo, useState } from 'react';
 import { generateDoctorReport, hasSymptomHistory } from '../services/apiService';
 import { FileTextIcon, AlertCircleIcon, ZapIcon } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
+import type { DoctorReport } from '../types';
 
+const emptyReport: DoctorReport = {
+  'reason': '',
+  'HPI': [],
+  'impression': ''
+};
+
+// make all generatedReport into one string
+const formatReport = (report: DoctorReport): string => {
+  return `Reason for Visit: ${report.reason}\n\n` +
+         `HPI (History of Present Illness):\n${report.HPI.join('\n')}\n\n` +
+         `Impression: ${report.impression}`;
+}
 
 export const ReportGenerator: React.FC = () => {
   const [reasonForVisit, setReasonForVisit] = useState<string>('');
-  const [generatedReport, setGeneratedReport] = useState<string | null>(null);
+  const [generatedReport, setGeneratedReport] = useState<DoctorReport>(emptyReport);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +38,7 @@ export const ReportGenerator: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
-    setGeneratedReport(null);
+    setGeneratedReport(emptyReport);
 
     try {
       const report = await generateDoctorReport("00000000-0000-0000-0000-000000000000", reasonForVisit);
@@ -96,10 +109,18 @@ export const ReportGenerator: React.FC = () => {
             // otherwise, basic formatting via whitespace-pre-wrap.
             // For explicit formatting, one might parse Markdown here if AI returns it.
           >
-            {generatedReport}
+            <p><strong>Reason for Visit:</strong> {generatedReport.reason}</p>
+            <p><strong>HPI (History of Present Illness):</strong>
+              {generatedReport.HPI.map((item, index) => (
+                <span key={index} className="block mt-1">
+                  {item}<br />
+                </span>))
+              }
+            </p>
+            <p><strong>Impression:</strong> {generatedReport.impression}</p>
           </div>
            <button
-            onClick={() => navigator.clipboard.writeText(generatedReport)}
+            onClick={() => navigator.clipboard.writeText(formatReport(generatedReport))}
             className="mt-4 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1"
           >
             Copy Report to Clipboard

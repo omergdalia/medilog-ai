@@ -75,7 +75,7 @@ def has_history(user_id: UUID) -> bool:
 
 
 @api_router.get("/get_history/{user_id}")
-def get_history(user_id: UUID) -> bool:
+def get_history(user_id: UUID):
     """
     Checks if the user has any recorded symptoms in the database.
     Returns True if there are symptoms, False otherwise.
@@ -83,9 +83,12 @@ def get_history(user_id: UUID) -> bool:
     symptoms = database.get_symptoms_for_patient(patient_id=user_id)
     if not symptoms:
         raise HTTPException(status_code=404, detail="No symptoms found for this user.")
-    return JSONResponse(database.get_symptoms_for_patient(patient_id=user_id))
+    for symptom in symptoms:
+        symptom['summary'] = symptom['summary'].split("\n")
+    return JSONResponse(symptoms, status_code=200)
 
-@api_router_get("/is_existing_patient/{email}")
+
+@api_router.get("/is_existing_patient/{email}")
 def has_patient(email: str) -> bool:
     """
     Checks if a patient exists in the database by email.

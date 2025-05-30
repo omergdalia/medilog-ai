@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getSymptomHistory } from '../services/apiService';
-import { type SymptomEntry } from '../types.ts';
+import { type SymptomResponse } from '../types.ts';
 
 
 const SymptomHistoryView: React.FC = () => {
 
-  const [symptomEntries, setSymptomEntries] = useState<SymptomEntry[]>([]);
+  const [symptomEntries, setSymptomEntries] = useState<SymptomResponse[]>([]);
   useEffect(() => {
     getSymptomHistory('00000000-0000-0000-0000-000000000000').then(entries => setSymptomEntries(entries));
   }, []);
@@ -17,7 +17,7 @@ if (symptomEntries.length === 0) {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-indigo-700 mb-6 border-b pb-2">Symptom History</h2>
-      {symptomEntries.slice().map((entry, index) => (
+      {symptomEntries.slice().reverse().map((entry, index) => (
         <div
           key={index}
           className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
@@ -35,7 +35,11 @@ if (symptomEntries.length === 0) {
               <span className="underline underline-offset-2 hidden group-open:inline">Hide Summary</span>
             </summary>
             <div className="mt-2 bg-indigo-50 text-slate-800 p-4 rounded-lg border border-indigo-100">
-              {entry.summary}
+              {entry.summary.map((item, index) => (
+                <span key={index} className="block mt-1">
+                  {item}<br />
+                </span>))
+              }
             </div>
           </details>
         </div>

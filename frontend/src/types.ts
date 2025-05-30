@@ -5,9 +5,19 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
-export interface SymptomEntry {
+export interface ChatResponse {
+  answer: string;
+  stop: boolean;
+}
+
+export interface DoctorReport {
+  reason: string;
+  HPI: string[];
+  impression: string;
+}
+
+export interface SymptomResponse {
   timestamp: Date;
   title: string;
-  summary: string; 
+  summary: string[];
 }
-    

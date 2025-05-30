@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { SymptomEntry } from '../types.ts';
+import type { ChatResponse, DoctorReport, SymptomResponse } from '../types.ts';
 
 export const checkPatientExists = async (email: string): Promise<boolean> => {
   const url = `${process.env.API_BASE}/is_existing_patient/${email}`;
@@ -17,10 +17,10 @@ export const checkPatientExists = async (email: string): Promise<boolean> => {
 
 
 
-export const sendMessageInChat = async (id: string, message: string): Promise<string> => {
+export const sendMessageInChat = async (id: string, message: string): Promise<ChatResponse> => {
   const url = `${process.env.API_BASE}/response/${id}?prompt=${encodeURIComponent(message)}`;
   try {
-    const res = await axios.get<{ answer: string }>(url, {headers: {'Accept': 'application/json'}});
+    const res = await axios.get<ChatResponse>(url, {headers: {'Accept': 'application/json'}});
     if (res.status >= 200 && res.status < 300) {
         return res.data;
     } else {
@@ -31,12 +31,12 @@ export const sendMessageInChat = async (id: string, message: string): Promise<st
   }
 };
 
-export const generateDoctorReport = async (id: string, reasonForVisit: string): Promise<string> => {
+export const generateDoctorReport = async (id: string, reasonForVisit: string): Promise<DoctorReport> => {
   const url = `${process.env.API_BASE}/doctor_report/${id}?prompt=${encodeURIComponent(reasonForVisit)}`;
   try {
-    const res = await axios.get<{ answer: string }>(url, {headers: {'Accept': 'application/json'}});
+    const res = await axios.get<DoctorReport>(url, {headers: {'Accept': 'application/json'}});
     if (res.status >= 200 && res.status < 300) {
-        return res.data.answer;
+        return res.data;
     } else {
       throw new Error(`Request failed with status: ${res.status}`);
     }
@@ -72,10 +72,10 @@ export const saveSymptom = async (id: string) => {
   }
 };
 
-export const getSymptomHistory = async (id: string): Promise<SymptomEntry[]> => {
+export const getSymptomHistory = async (id: string): Promise<SymptomResponse[]> => {
   const url = `${process.env.API_BASE}/get_history/${id}`;
   try {
-    const res = await axios.get<SymptomEntry[]>(url, {headers: {'Accept': 'application/json'}});
+    const res = await axios.get<SymptomResponse[]>(url, {headers: {'Accept': 'application/json'}});
     if (res.status >= 200 && res.status < 300) {
       return res.data.map(entry => ({
         'timestamp': new Date(entry.timestamp),
