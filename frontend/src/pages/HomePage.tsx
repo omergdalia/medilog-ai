@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit3Icon, FileTextIcon } from 'lucide-react';
+import { Edit3Icon, StethoscopeIcon, FileTextIcon } from 'lucide-react';
 import { SymptomLogger } from '../components/SymptomLogger';
 import { ReportGenerator } from '../components/ReportGenerator';
 import SymptomHistoryView from '../pages/SymptomHistoryView';
@@ -46,7 +46,19 @@ const HomePage:React.FC = () => {
       };
 
     return (
-        <>
+      <>
+      <header className="w-full max-w-4xl mb-8 text-center">
+              <div className="flex items-center justify-center space-x-3 mb-2">
+                <StethoscopeIcon className="w-12 h-12 text-indigo-600" />
+                <h1 className="text-4xl md:text-5xl font-bold text-indigo-700 tracking-tight">
+                  MediLog<span className="text-sky-500">AI</span>
+                </h1>
+              </div>
+              <p className="text-slate-600 text-lg">
+                Your intelligent partner for tracking symptoms and preparing for doctor visits.
+              </p>
+            </header>
+      <div className="flex flex-col items-center justify-start min-h-screen w-full p-4">
         <nav className="w-full max-w-md mb-8 p-2 bg-slate-200/50 rounded-xl shadow-md flex justify-around space-x-2 backdrop-blur-sm">
         <NavButton 
           Icon={Edit3Icon} 
@@ -76,6 +88,7 @@ const HomePage:React.FC = () => {
         <p>&copy; {new Date().getFullYear()} MediLogAI. For demonstration purposes only. Not for real medical use.</p>
         <p>Ensure your <code>API_KEY</code> environment variable is set for AI features.</p>
       </footer>
+    </div>
     </>
     );
 }
