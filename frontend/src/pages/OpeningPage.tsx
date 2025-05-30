@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import {jwtDecode } from "jwt-decode";
+import { checkPatientExists } from '../services/apiService';
 
 declare global {
   interface Window {
@@ -17,9 +18,15 @@ export default function OpeningPage() {
   const handleUserLogin = (email: string) => {
     // Here you can handle the user login logic, e.g., store the email in state or context
     console.log("User logged in with email:", email);
-    
+    const userExists = await checkPatientExists(email);
+    if(userExists)  {
+      console.log("User with email:" + email + " exists, signing in and redirecting to dashboard...");
+      // Redirect to dashboard after login
 
-    navigate("/dashboard"); // Redirect to dashboard after login
+      navigate("/");
+    } else {
+
+    navigate("/SignUp"); // Redirect to dashboard after login
   };
 
   return (
@@ -27,7 +34,7 @@ export default function OpeningPage() {
       <h1 className="text-3xl font-bold mb-6">Welcome to My App</h1>
      <GoogleLogin
         onSuccess={(credentialResponse) => {
-          const email = jwtDecode<{ email: string }>(credentialResponse.credential).email;
+          const decodedJSON = jwtDecode(credentialResponse.credential);
           handleUserLogin(email);
         }}
         onError={() => console.error("Google Login Error")} />

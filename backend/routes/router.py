@@ -31,6 +31,20 @@ def get_user(user_id: UUID) -> User:
 
     # new_user_id = uuid4()
 
+@api_router.get("/signin_user/{user_email}")
+def signin_user(user_email: str):
+    """
+    Signs in a user by email. If the user does not exist, it creates a new user.
+    Returns the user_id.
+    """
+    try:
+        patient = database.get_patient(email=user_email)
+        user_id = UUID(patient['patient_id'])
+        users_dict[user_id] = User(user_id=user_id, database=database)
+    except Exception as e:
+        # If the patient does not exist, create a new one
+        print(f"Error fetching patient: {e}")
+
 @api_router.get("/response/{user_id}")
 def get_response(user_id: UUID, prompt: str):
     answer, stop = get_user(user_id=user_id).get_response(prompt)
@@ -70,6 +84,19 @@ def get_history(user_id: UUID) -> bool:
         raise HTTPException(status_code=404, detail="No symptoms found for this user.")
     return JSONResponse(database.get_symptoms_for_patient(patient_id=user_id))
 
+@api_router_get("/is_existing_patient/{email}")
+def has_patient(email: str) -> bool:
+    """
+    Checks if a patient exists in the database by email.
+    Returns True if the patient exists, False otherwise.
+    """
+    try:
+        database.get_patient(email=email)
+        return True
+    except Exception as e:
+        # If the patient does not exist, an exception will be raised
+        return False
+# consider maybe creating a function in the db for checking if a patient exists.
 
 @api_router.post("/llm")
 def llm_endpoint(input_data: dict):
@@ -78,6 +105,7 @@ def llm_endpoint(input_data: dict):
     result = manager.run(input_data)
     return {"result": result}
 # example endpoint - post with path parameter (e.g., /submit/report/123) & query parameters
+
 
 @api_router.post("/submit/report/{report_id}")
 def submit_report(report_id: str, report_data: dict):

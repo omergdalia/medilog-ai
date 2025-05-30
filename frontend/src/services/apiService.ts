@@ -1,6 +1,22 @@
 import axios from 'axios';
 import type { SymptomEntry } from '../types.ts';
 
+export const checkPatientExists = async (email: string): Promise<boolean> => {
+  const url = `${process.env.API_BASE}/is_existing_patient/${email}`;
+  try {
+    const res = await axios.get<boolean>(url, {headers: {'Accept': 'application/json'}});
+    if (res.status >= 200 && res.status < 300) {
+      return res.data;
+    } else {
+      throw new Error(`Request failed with status: ${res.status}`);
+    }
+  } catch (error) {
+    throw new Error("Failed to check if patient exists: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+}
+
+
+
 export const sendMessageInChat = async (id: string, message: string): Promise<string> => {
   const url = `${process.env.API_BASE}/response/${id}?prompt=${encodeURIComponent(message)}`;
   try {
