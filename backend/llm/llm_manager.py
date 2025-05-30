@@ -87,8 +87,7 @@ class LLMManager:
     "Instructions for the Clinical Note:\n"
     "1.  **Patient Concern / Reason for Visit:** Clearly state the patient's current reason for the visit as provided: \"{visit_reason}\".\n"
     "2.  **History of Present Illness (HPI) - from Past Summaries:**\n"
-    "    - If the 'Relevant Past Medical Summary' section above IS EXACTLY \"{_NO_CONTEXT_STRING}\", then state: \"No past medical summary was provided.\" under this HPI section.\n"
-    "    - Otherwise (if past summary IS provided):\n"
+    "        - Use the provided 'Relevant Past Medical Summary' to extract and summarize any historical information that is directly relevant to the current reason for visit.\n"
     "        - Chronologically summarize information from the 'Relevant Past Medical Summary' that is *directly relevant* to the 'Current Reason for Visit'.\n"
     "        - When detailing specific points from past interactions, use the bullet point style defined in section 4 ('Formatting and Tone').\n" # Explicitly refer to the style
     "        - Focus on dates, initial symptoms, key details (like severity, duration, nature of symptoms, related activities or treatments mentioned).\n"
