@@ -4,6 +4,7 @@ import { StethoscopeIcon} from 'lucide-react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import OpeningPage from "./pages/OpeningPage.tsx";
 import HomePage from './pages/HomePage.tsx';
+import SignupPage from "./pages/SignUpPage.tsx";
 
 const App: React.FC = () => {  
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/login" element={<OpeningPage />} />
           <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<SignupPage />} />
         </Routes>
       </BrowserRouter>
     </div>
