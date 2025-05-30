@@ -74,42 +74,87 @@ class LLMManager:
         "• States trial of ibuprofen provided minimal and temporary relief.\n\n"
         "Your output should be ONLY the bullet-point summary using this exact format and style."
     )
+    _DOCTOR_REPORT_REASON_TITLE_SYSTEM_PROMPT = (
+        "You are a medical report assistant specializing in creating concise section titles for clinical notes. "
+        "Your task is to generate a brief title (3-7 words) for the 'Patient Concern / Reason for Visit' section of a doctor's report, based on the provided reason.\n\n"
+        "INPUT:\n"
+        "The 'Reason for Visit' will be provided below.\n\n"
+        "TASK:\n"
+        "1.  Analyze the provided 'Reason for Visit'.\n"
+        "2.  Condense its main theme into a clear, professional title of 3-7 words.\n"
+        "3.  The title should be suitable for a clinical note heading.\n"
+        "4.  CRUCIAL: Do NOT include any interpretation, diagnosis, or medical advice in the title.\n\n"
+        "EXAMPLES OF DESIRED TITLES (based on hypothetical visit reasons):\n"
+        "If Reason for Visit is 'I've been having a really bad cough for a week and some fever.':\n"
+        "   - Possible Title: 'Persistent Cough and Fever Evaluation'\n"
+        "If Reason for Visit is 'My right knee has been very painful and swollen since I twisted it playing soccer.':\n"
+        "   - Possible Title: 'Right Knee Pain and Swelling Post-Injury'\n"
+        "If Reason for Visit is 'Follow-up for my high blood pressure.':\n"
+        "   - Possible Title: 'Hypertension Follow-Up Visit'\n\n"
+        "OUTPUT:\n"
+        "Return ONLY the generated title. Do not include any other text, explanation, or quotation marks around the title.\n\n"
+        "Reason for Visit:\n"
+        "\"{visit_reason}\"" # Keeping the quotes as per your existing structure for variable injection
+    )
 
-    _DOCTOR_REPORT_SYSTEM_PROMPT_BASE = (
-    "You are a medical report assistant. Your task is to generate a concise, organized, and objective clinical note for a doctor. "
-    "The note should be based on the 'Current Reason for Visit' and the 'Relevant Past Medical Summary' provided below.\n\n"
-    "Current Reason for Visit:\n"
-    "\"{visit_reason}\"\n\n"
-    "Relevant Past Medical Summary:\n"
-    "---\n"
-    "{user_context_string}\n"  # This will be your NO_CONTEXT_STRING if empty
-    "---\n\n"
-    "Instructions for the Clinical Note:\n"
-    "1.  **Patient Concern / Reason for Visit:** Clearly state the patient's current reason for the visit as provided: \"{visit_reason}\".\n"
-    "2.  **History of Present Illness (HPI) - from Past Summaries:**\n"
-    "        - Use the provided 'Relevant Past Medical Summary' to extract and summarize any historical information that is directly relevant to the current reason for visit.\n"
-    "        - Chronologically summarize information from the 'Relevant Past Medical Summary' that is *directly relevant* to the 'Current Reason for Visit'.\n"
-    "        - When detailing specific points from past interactions, use the bullet point style defined in section 4 ('Formatting and Tone').\n" # Explicitly refer to the style
-    "        - Focus on dates, initial symptoms, key details (like severity, duration, nature of symptoms, related activities or treatments mentioned).\n"
-    "        - Highlight any recurring symptoms, significant patterns, or escalations evident from the logs that pertain to the current visit's reason.\n"
-    "        - If multiple past entries exist, synthesize them. Do not just list them verbatim unless a direct quote is essential for context. Individual key findings from different entries can be presented as separate bullet points.\n"
-    "        - If, after reviewing the provided past summary, no entries seem relevant to the current reason, briefly state that 'The past summary did not contain information directly relevant to the current complaint.' However, still list any major chronic conditions if these are clearly identifiable from the past summary, potentially using the specified bullet point style for these conditions.\n"
-    "3.  **Overall Impression (Factual Summary, No Diagnosis):** Briefly combine the current reason with highly relevant historical points (if any) into a 1-2 sentence factual overview of the patient's situation leading to this visit. This section is typically narrative, not bulleted.\n"
-    "4.  **Formatting and Tone:**\n"
-    "    - The report must be objective, clear, and factual. Use professional medical terminology where appropriate, but ensure overall understandability.\n"
-    "    - Use clear headings for sections (e.g., 'Patient Concern', 'History of Present Illness', 'Impression').\n"
-    "    - **Bullet Point Style:** When using bullet points for lists or to itemize specific details (especially in the HPI or when listing multiple findings):\n"
-    "        *   **Use the '•' character (Unicode U+2022) at the beginning of each bullet point, followed by a single space.**\n"
-    "        *   Each bullet point should be a complete, descriptive sentence or a well-formed, informative phrase conveying a specific piece of information.\n"
-    "        *   For example, if summarizing a past headache entry: \"• Reported onset of severe headache on 2023-10-15.\"\n" # Short example of style application
-    "    - Be concise. Doctors appreciate brevity.\n"
-    "5.  **Crucial Exclusions:**\n"
-    "    - Do NOT provide any diagnosis.\n"
-    "    - Do NOT suggest any medical advice or treatments.\n"
-    "    - Do NOT interpret findings beyond what is stated; stick to reporting the provided information.\n\n"
-    "For context, the current time when this report is being generated is: {current_time}.\n\n"
-    "Generate the clinical note now based on these instructions."
+    _DOCTOR_REPORT_HPI_SYSTEM_PROMPT = (
+        "You are a clinical note assistant specializing in composing the 'History of Present Illness (HPI)' section for medical reports. "
+        "Your task is to synthesize relevant information from the patient's 'Relevant Past Medical Summary' that directly pertains to their 'Current Reason for Visit'.\n\n"
+        "INPUTS:\n"
+        "1. Current Reason for Visit: \"{visit_reason}\"\n" # Added this as input
+        "2. Relevant Past Medical Summary (a chronological collection of past interaction summaries):\n"
+        "   ---\n"
+        "   {user_context_string}\n"
+        "   ---\n\n"
+        "TASK:\n"
+        "1.  Carefully review the 'Current Reason for Visit'.\n"
+        "2.  Analyze the 'Relevant Past Medical Summary' to identify entries, symptoms, or details (e.g., dates, severity, duration, nature, treatments mentioned) that are *directly relevant* to the 'Current Reason for Visit'.\n"
+        "3.  Chronologically synthesize these relevant details into the HPI.\n"
+        "4.  If recurring patterns, escalations, or significant prior events related to the current complaint are evident in the summary, highlight them.\n"
+        "5.  If, after thorough review, the 'Relevant Past Medical Summary' contains no information directly pertinent to the 'Current Reason for Visit', the HPI should consist of a single statement: \"The past summary did not contain information directly relevant to the current complaint.\"\n"
+        "6.  If major chronic conditions are clearly identifiable from the past summary AND are relevant background (even if not directly part of the acute reason for visit), they may be briefly mentioned. For example: 'Patient has a known history of [chronic condition].'\n"
+        "7.  CRUCIAL: Remain strictly objective. Do NOT provide any diagnosis, interpretation beyond factual reporting, or medical advice.\n\n"
+        "OUTPUT FORMATTING (using the '•' bullet character):\n"
+        "-   Each distinct relevant finding or summarized point from the past medical summary should be presented as a separate bullet point.\n"
+        "-   Start each bullet point with the '•' character (Unicode U+2022), followed by a single space.\n"
+        "-   Bullet points should be concise, factual, and complete sentences or informative phrases.\n\n"
+        "EXAMPLE OF DESIRED HPI OUTPUT (hypothetical, assuming relevant past entries):\n"
+        "If Reason for Visit is 'Follow-up for persistent cough' and past summary includes:\n"
+        "  '[2023-10-15] Cough and Mild Fever: Patient reported a dry cough starting 3 days prior, with mild fever. Advised rest.'\n"
+        "  '[2023-10-22] Worsening Cough: Patient reports cough is now productive, green sputum. Denies fever. Prescribed amoxicillin.'\n\n"
+        "Possible HPI Output:\n"
+        "• Patient initially presented on 2023-10-15 with a dry cough and mild fever of 3 days duration.\n"
+        "• On 2023-10-22, the cough was reported as productive with green sputum; amoxicillin was prescribed at that time.\n"
+        "• Current visit is for follow-up of this persistent cough.\n\n"
+        "OUTPUT:\n"
+        "Return ONLY the HPI section, formatted with '•' bullet points as specified. If no relevant history, return the single specified sentence."
+    )
+
+    _DOCTOR_REPORT_IMPRESSION_SYSTEM_PROMPT = (
+    "You are a medical information assistant tasked with creating an 'Observational Summary' section for a doctor's preliminary report. "
+    "This summary should highlight key patterns, evolutions, or significant points derived *strictly* from the provided 'Concise Reason for Visit' and the 'History of Present Illness (HPI) Section'. "
+    "It is NOT a clinical diagnosis or interpretation, but rather an objective distillation of the presented information to aid the doctor's review.\n\n"
+    "INPUTS:\n"
+    "1. Concise Reason for Visit: \"{visit_reason}\"\n"
+    "2. History of Present Illness (HPI) Section (which details relevant past events):\n"
+    "   {hpi}\n\n"
+    "TASK:\n"
+    "1.  Carefully review the 'Concise Reason for Visit' and the 'HPI Section'.\n"
+    "2.  Identify any notable patterns (e.g., recurrence of symptoms, progression over time, response or lack of response to previous mentions of self-care/interventions if detailed in HPI), or significant temporal relationships between the current visit reason and the HPI.\n"
+    "3.  Synthesize these observations into a concise 1-3 sentence summary.\n"
+    "4.  The summary should connect the current reason for visit with the most salient observations from the HPI, focusing on *what* has happened rather than *why* (which is for the doctor to determine).\n"
+    "5.  CRUCIAL: This summary must be strictly factual and observational. It must NOT contain any diagnostic language, clinical interpretations, suggestions of underlying causes, or predictions. Stick to summarizing the timeline and reported events.\n\n"
+    "EXAMPLE OF DESIRED OBSERVATIONAL SUMMARY OUTPUT:\n"
+    "If Reason for Visit is 'Follow-up for persistent cough' and HPI details a cough that started 2 weeks ago, was noted as 'dry' then became 'productive', and a past entry mentioned a similar cough episode 6 months prior:\n\n"
+    "Possible Observational Summary Output:\n"
+    "\"The current presentation for a persistent cough follows a reported change in cough character from dry to productive over the past two weeks. The HPI also notes a previous episode of a similar cough approximately six months ago.\"\n\n"
+    "If Reason for Visit is 'Worsening knee pain' and HPI details initial mild pain after a fall 1 month ago, which has gradually increased despite rest:\n\n"
+    "Possible Observational Summary Output:\n"
+    "\"This visit is for knee pain that reportedly began as mild following a fall one month prior and has since progressively worsened despite rest, according to the HPI.\"\n\n"
+    "OUTPUT:\n"
+    "Return ONLY the 1-3 sentence 'Observational Summary'. Do not include any other text, headings, or explanations."
 )
+
 
     def __init__(self, api_key: str=api_key, model_name: str = 'gemini-2.5-flash-preview-05-20', user_context: Any = None, end_text: str = "FINISHED"):
         genai.configure(api_key=api_key)
@@ -223,39 +268,63 @@ class LLMManager:
 
 
 
-    def get_doctor_report(self, visit_reason: str) -> str:
+    def get_doctor_report(self, visit_reason: str) -> dict[str, str]:
         """
-        Generate a clinical note for a doctor based on the visit reason and user context.
+        Generate a clinical note split into reason (title), HPI, and Impression.
 
         Args:
             visit_reason (str): The reason for the patient's visit.
 
         Returns:
-            str: The generated clinical note for the doctor.
+            dict: Dictionary with keys 'reason', 'HPI', and 'Impression'.
         """
         if not visit_reason:
             raise ValueError("Visit reason must be provided for the doctor report.")
         if not self.formatted_user_context_str or self.formatted_user_context_str == self._NO_CONTEXT_STRING:
             raise ValueError("User context must be provided for the doctor report.")
-        
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        doctor_report_prompt_instruction = self._DOCTOR_REPORT_SYSTEM_PROMPT_BASE.format(
-            visit_reason=visit_reason,
-            user_context_string=self.formatted_user_context_str,
-            current_time=current_time
-        )
-        report_generation_model = genai.GenerativeModel(
-            model_name=self._model_name,
-            system_instruction=doctor_report_prompt_instruction
-        )
-        
-        final_prompt_for_report = f"Please generate the clinical note for a patient visiting due to: {visit_reason}."
 
+        # 1. Generate Title (Reason)
+        title_model = genai.GenerativeModel(
+            model_name=self._model_name,
+            system_instruction=self._DOCTOR_REPORT_REASON_TITLE_SYSTEM_PROMPT.format(visit_reason=visit_reason)
+        )
         try:
-            response = report_generation_model.generate_content(final_prompt_for_report)
-            return response.text
+            title_response = title_model.generate_content("Generate a concise title for the reason for visit.")
+            title = title_response.text.strip()
         except Exception as e:
-            raise
+            raise RuntimeError("Failed to generate reason/title") from e
+
+        # 2. Generate HPI
+        hpi_model = genai.GenerativeModel(
+            model_name=self._model_name,
+            system_instruction=self._DOCTOR_REPORT_HPI_SYSTEM_PROMPT.format(user_context_string=self.formatted_user_context_str, visit_reason=title)
+        )
+        try:
+            hpi_response = hpi_model.generate_content("Now generate the history of present illness.")
+            hpi = hpi_response.text.strip()
+        except Exception as e:
+            raise RuntimeError("Failed to generate HPI") from e
+
+        # 3. Generate Impression
+        impression_model = genai.GenerativeModel(
+            model_name=self._model_name,
+            system_instruction=self._DOCTOR_REPORT_IMPRESSION_SYSTEM_PROMPT.format(
+                visit_reason=title,
+                hpi=hpi
+            )
+        )
+        try:
+            impression_response = impression_model.generate_content("Now generate the overall impression.")
+            impression = impression_response.text.strip()
+        except Exception as e:
+            raise RuntimeError("Failed to generate Impression") from e
+
+        return {
+            "reason": title,
+            "HPI": hpi,
+            "impression": impression
+        }
+
 
     def reset_symptom_session(self, new_user_context: Optional[Any] = None) -> None:
         """

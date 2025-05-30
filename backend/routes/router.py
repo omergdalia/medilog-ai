@@ -60,7 +60,8 @@ def save_summary(user_id: UUID):
 @api_router.get("/doctor_report/{user_id}")
 def get_doctors_report(user_id: UUID, prompt: str):
     answer = get_user(user_id=user_id).get_doctor_report(prompt)
-    return JSONResponse(content={'answer': answer})
+    hpi_list  = answer['HPI'].split('\n')
+    return JSONResponse(content={'reason': answer['reason'], 'HPI': hpi_list, 'impression': answer['impression']})
 
 
 @api_router.get("/has_history/{user_id}")
