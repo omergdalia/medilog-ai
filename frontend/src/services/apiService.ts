@@ -15,7 +15,19 @@ export const checkPatientExists = async (email: string): Promise<boolean> => {
   }
 }
 
-
+export const signInUser = async (email: string): Promise<string> => {
+  const url = `${process.env.API_BASE}/signin/${email}`;
+  try {
+    const res = await axios.get<{ id: string }>(url, {headers: {'Accept': 'application/json'}});
+    if (res.status >= 200 && res.status < 300) {
+      return res.data.id;
+    } else {
+      throw new Error(`Request failed with status: ${res.status}`);
+    }
+  } catch (error) {
+    throw new Error("Failed to sign in user: " + (error instanceof Error ? error.message : "Unknown error"));
+  }
+};  
 
 export const sendMessageInChat = async (id: string, message: string): Promise<ChatResponse> => {
   const url = `${process.env.API_BASE}/response/${id}?prompt=${encodeURIComponent(message)}`;

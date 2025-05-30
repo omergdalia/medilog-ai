@@ -38,7 +38,7 @@ def signin_user(user_email: str):
     Returns the user_id.
     """
     try:
-        patient = database.get_patient(email=user_email)
+        patient = database.get_patient_by_email(user_email)
         user_id = UUID(patient['patient_id'])
         users_dict[user_id] = User(user_id=user_id, database=database)
     except Exception as e:
@@ -95,7 +95,7 @@ def has_patient(email: str) -> bool:
     Returns True if the patient exists, False otherwise.
     """
     try:
-        database.get_patient(email=email)
+        database.get_patient_by_email(email)
         return True
     except Exception as e:
         # If the patient does not exist, an exception will be raised
