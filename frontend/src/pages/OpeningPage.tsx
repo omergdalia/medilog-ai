@@ -120,7 +120,7 @@ export default function OpeningPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 to-indigo-200 p-4 sm:p-6">
       <div className="w-full max-w-md bg-white/80 backdrop-blur-lg rounded-xl shadow-xl p-8 sm:p-10 border border-slate-300/70">
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-indigo-700 mb-3 text-center">
-          Welcome to <span className="text-sky-600">MediLogAI</span>
+          Welcome to <span className="text-sky-600">Medi</span>
         </h1>
         <p className="text-slate-500 text-md sm:text-lg mb-8 text-center">
           Your smart companion for tracking symptoms and prepping doctor visits.

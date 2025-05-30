@@ -59,7 +59,7 @@ const HomePage:React.FC = () => {
               <div className="flex items-center justify-center space-x-3 mb-2">
                 <StethoscopeIcon className="w-12 h-12 text-indigo-600" />
                 <h1 className="text-4xl md:text-5xl font-bold text-indigo-700 tracking-tight">
-                  MediLog<span className="text-sky-500">AI</span>
+                  Medi<span className="text-sky-500"></span>
                 </h1>
               </div>
               <p className="text-slate-600 text-lg">
@@ -93,7 +93,7 @@ const HomePage:React.FC = () => {
       </main>
       
       <footer className="mt-12 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} MediLogAI. For demonstration purposes only. Not for real medical use.</p>
+        <p>&copy; {new Date().getFullYear()} Medi. For demonstration purposes only. Not for real medical use.</p>
         <p>Ensure your <code>API_KEY</code> environment variable is set for AI features.</p>
       </footer>
     </div>

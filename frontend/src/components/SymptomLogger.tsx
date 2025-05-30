@@ -174,7 +174,7 @@ export const SymptomLogger: React.FC = () => {
             {isLoading && conversation.length > 0 && conversation[conversation.length -1].sender === 'user' && (
                 <div className="flex items-center justify-start space-x-2 p-2">
                     <MessageSquareIcon className="w-8 h-8 text-indigo-400 animate-pulse" />
-                    <span className="text-slate-500 italic">AI is typing...</span>
+                    <span className="text-slate-500 italic">Medi is typing...</span>
                 </div>
             )}
             <div ref={chatMessagesEndRef} />
@@ -240,7 +240,7 @@ const ChatMessageDisplay: React.FC<{ message: ChatMessage }> = ({ message }) => 
         <div className="flex items-center mb-1">
           {isUser ? <UserIcon className="w-4 h-4 mr-2" /> : <MessageSquareIcon className="w-4 h-4 mr-2 text-indigo-500" />}
           <span className={`font-semibold text-sm ${isUser ? 'text-sky-100' : 'text-indigo-600'}`}>
-            {isUser ? 'You' : 'MediLogAI'}
+            {isUser ? 'You' : 'Medi'}
           </span>
         </div>
         <p className="text-sm whitespace-pre-wrap">{message.text}</p>
