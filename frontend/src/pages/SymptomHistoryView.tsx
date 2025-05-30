@@ -7,7 +7,7 @@ const SymptomHistoryView: React.FC = () => {
 
   const [symptomEntries, setSymptomEntries] = useState<SymptomResponse[]>([]);
   useEffect(() => {
-    getSymptomHistory('00000000-0000-0000-0000-000000000000').then(entries => setSymptomEntries(entries));
+    getSymptomHistory(`${process.env.UUID}`).then(entries => setSymptomEntries(entries));
   }, []);
 
 if (symptomEntries.length === 0) {

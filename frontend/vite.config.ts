@@ -35,6 +35,7 @@ export default defineConfig(({mode}) => {
       // 'process.env.BACKEND_PORT': parseInt(sharedEnv.VITE_BACKEND_PORT) || 8000,
       'process.env.API_BASE': JSON.stringify(`http://localhost:${sharedEnv.VITE_BACKEND_PORT || '8000'}/api`),
       'process.env.GOOGLE_CLIENT_ID': JSON.stringify(sharedEnv.VITE_GOOGLE_CLIENT_ID),
+      'process.env.UUID': JSON.stringify(sharedEnv.VITE_UUID || '00000000-0000-0000-0000-000000000000'),
     },
   };
 });

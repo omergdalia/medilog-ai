@@ -2,6 +2,8 @@
 from http.client import HTTPException
 from typing import List
 
+import os
+
 import db
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
@@ -29,11 +31,13 @@ class SignupData(BaseModel):
 database = Database()
 
 
+
+
 def get_user(user_id: UUID) -> User:
 
     if user_id in users_dict:
         return users_dict[user_id]
-    new_user_id = UUID("00000000-0000-0000-0000-000000000000") # for testing
+    new_user_id = UUID(os.getenv('UUID')) # for testing
 
     users_dict[new_user_id] = User(user_id=new_user_id, database=database)
     return users_dict[new_user_id]
@@ -90,8 +94,6 @@ def get_history(user_id: UUID):
     Returns True if there are symptoms, False otherwise.
     """
     symptoms = database.get_symptoms_for_patient(patient_id=user_id)
-    if not symptoms:
-        raise HTTPException(status_code=404, detail="No symptoms found for this user.")
     for symptom in symptoms:
         symptom['summary'] = symptom['summary'].split("\n")
     return JSONResponse(symptoms, status_code=200)

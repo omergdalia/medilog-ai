@@ -24,7 +24,7 @@ export const ReportGenerator: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const allowReporting = useMemo(() => hasSymptomHistory('00000000-0000-0000-0000-000000000000'), ['start']);
+  const allowReporting = useMemo(() => hasSymptomHistory(`${process.env.UUID}`), ['start']);
 
   const handleGenerateReport = async () => {
     if (!reasonForVisit.trim()) {
@@ -41,7 +41,7 @@ export const ReportGenerator: React.FC = () => {
     setGeneratedReport(emptyReport);
 
     try {
-      const report = await generateDoctorReport("00000000-0000-0000-0000-000000000000", reasonForVisit);
+      const report = await generateDoctorReport(`${process.env.UUID}`, reasonForVisit);
       setGeneratedReport(report);
     } catch (err) {
       console.error(err);

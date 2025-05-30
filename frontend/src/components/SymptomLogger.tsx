@@ -21,7 +21,7 @@ enum LoggingStage {
 // import { v4 as uuidv4 } from 'uuid';
 
 
-const MY_UUID: string = "00000000-0000-0000-0000-000000000000";
+const MY_UUID: string = `${process.env.UUID}`;
 
 export const SymptomLogger: React.FC = () => {
   const [initialSymptom, setInitialSymptom] = useState<string>('');
@@ -94,7 +94,7 @@ export const SymptomLogger: React.FC = () => {
   };
 
   const handleSaveEntry = () => {
-    saveSymptom('00000000-0000-0000-0000-000000000000');
+    saveSymptom(`${process.env.UUID}`);
     setStage(LoggingStage.Done);
     // Optionally reset for new entry after a delay or user action
     setTimeout(() => resetLogger(), 3000);
